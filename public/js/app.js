@@ -467,13 +467,14 @@ function Configuration() {
     var values;
     if (id == 1) {
       // influenza
-      values = [0.2, 0.0001, 0.0001, 0.002, 2, 0.75, 10, 0.004];
+      values = [0.2, 0.0001, 0.0001, 0.002, 2, 0.7, 5, 0.004];
     } else if(id == 2) {
       // smallpox
       values = [0.01, 0.0001, 0.0001, 0.005, 0.3, 0.6, 0.1, 0.01];
     } else if(id == 3) {
       // covid
-      values = [0.01, 0.0001, 0.0001, 0.004, 0.3, 0.6, 0.05, 0.004];
+      //verify preset with academic work
+      values = [0.2, 0.0001, 0.0001, 0.02, 5, 0.8, 14, 0.004];
     }
     for(var id in params) {
       var param = params[id];
@@ -533,7 +534,7 @@ function Epidemic(_config, _grid, _picture) {
     recArea.innerHTML = ("Recovered population: " + rec + "M");
 
     //check if simulation is finished
-    if (iterationNumber > 150){//smaller than default starting amount
+    if (iterationNumber > 200){//smaller than default starting amount
       this.finished();
     }
   }
@@ -567,6 +568,7 @@ function Epidemic(_config, _grid, _picture) {
 
   this.defaultInfected = function() {
     grid.setAsInfected(500);//roughly top right
+    grid.setAsInfected(700);//roughly center
     grid.setAsInfected(800);//roughly bottom left
   }
 
