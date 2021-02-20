@@ -36,24 +36,26 @@ function showAlert(msg) {
 
 //# Cell class
 // This class represents one cell in the grid.
-// It contains three values:
-//
-// * population count
-// * infected population count
-// * population limit (limited e.g. by the number of houses or food
-// availability)
 function Cell(populationCount, infectedCount, populationLimit) {
   var populationCount = populationCount; //S
+  var incubatedCount = 0; //E
   var infectedCount = infectedCount; //I
   var recoveredCount = 0;  //R
   var populationLimit = populationLimit;
   var infectedQueue = [];
+  var incubatedQueue = [];
 
   this.__defineGetter__("populationCount", function(){
     return populationCount;
   });
   this.__defineSetter__("populationCount", function(val){
     populationCount = val;
+  });
+  this.__defineGetter__("incubatedCount", function(){
+    return incubatedCount;
+  });
+  this.__defineSetter__("incubatedCount", function(val){
+    incubatedCount = val;
   });
   this.__defineGetter__("infectedCount", function(){
     return infectedCount;
@@ -78,6 +80,7 @@ function Cell(populationCount, infectedCount, populationLimit) {
   this.simNaturalDeaths = function(prob) {
     this.populationCount -= Math.round(this.populationCount * prob);
     this.infectedCount -= Math.round(this.infectedCount * prob);
+    this.incubatedCount -= Math.round(this.incubatedCount * prob);
   }
 
   // Simulates deaths caused by the virus (with given probability).
@@ -87,6 +90,10 @@ function Cell(populationCount, infectedCount, populationLimit) {
       var dead = Math.round(this.infectedCount / 5 * 4);
       this.populationCount -= dead;
       this.infectedCount -= dead;
+
+      dead = Math.round(this.incubatedCount / 5 * 4);
+      this.populationCount -= dead;
+      this.incubatedCount -= dead;
     }
   }
 
@@ -100,15 +107,26 @@ function Cell(populationCount, infectedCount, populationLimit) {
   }
 
   // Simulates new infections (with given probability).
-  this.simInfections = function(prob) {
+  this.simInfections = function(prob, incPeriod) {
     if (this.populationCount > 0) {
-      var susceptible = this.populationCount - this.infectedCount - this.recoveredCount;
+      var susceptible = this.populationCount - this.incubatedCount - this.infectedCount - this.recoveredCount;
       if (susceptible < 0){
         susceptible = 0;
       }
-      var infected = Math.round(susceptible * prob);
-      this.infectedCount += infected;
-      infectedQueue.push(infected);
+      var incubated = Math.round(susceptible * prob);
+      this.incubatedCount += incubated;
+      incubatedQueue.push(incubated);
+      //Once incubated for x days, become infected
+      if (incubatedQueue.length >= incPeriod){
+        var infected = incubatedQueue[0];
+        infectedQueue.push(infected);
+        this.infectedCount += infected;
+        incubatedQueue.shift();
+        this.incubatedCount -= infected;
+        if ((this.incubatedCount < 0) || (incubatedQueue.length == 0)){
+          this.incubatedCount = 0;
+        }
+      }
     }
   }
 
@@ -186,6 +204,9 @@ function Grid() {
   this.updateOverallCount = function() {
     populationOverallCount = _.reduce(cells, function(memo, cell) {
       return memo + cell.populationCount;
+    }, 0);
+    incubatedOverallCount = _.reduce(cells, function(memo, cell) {
+      return memo + cell.incubatedCount;
     }, 0);
     infectedOverallCount = _.reduce(cells, function(memo, cell) {
       return memo + cell.infectedCount;
@@ -354,13 +375,13 @@ function Grid() {
     // Simulates new contact and vectored infections. Then simulates recoveries.
     for(i = 0; i < cellsCount; i++) {
       var currCell = cells[i];
+      //percentage of population infected used as a probability
       var limitContactRate = currCell.infectedCount / currCell.populationCount;
       var contactRate = limitContactRate * config.contactInfectionRate
-      currCell.simInfections(contactRate);
-      currCell.simRecoveries(config.recoveryRate);
+      currCell.simInfections(contactRate, config.incPeriod);
+      currCell.simRecoveries(config.infPeriod);
     }
     this.simReturnImmigrations();
-    //config.updateRecoveryRate();
     this.updateOverallCount();
   }
 
@@ -425,7 +446,8 @@ function Picture(_cols, _rows) {
   this.updateWithNewData = function(cells) {
     for(i = 0; i < cellsCount; i++) {
       if (cells[i].populationLimit > 0) {
-        var percentage = cells[i].infectedCount / cells[i].populationCount;
+        var totalInfected = cells[i].infectedCount + cells[i].incubatedCount;
+        var percentage = totalInfected / cells[i].populationCount;
         ctx.fillStyle = "rgba(255,0,0," + percentage + ")";
         ctx.clearRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
                       sizeY, sizeX, sizeY);
@@ -453,8 +475,8 @@ function Picture(_cols, _rows) {
 function Configuration() {
 
   var params = ["immigrationRate", "birthRate", "naturalDeathRate",
-    "virusMorbidity", "vectoredInfectionRate", "contactInfectionRate",
-    "recoveryRate", "recoveryImprovement"];
+    "virusMorbidity", "incPeriod", "contactInfectionRate",
+    "infPeriod", "recoveryImprovement"];
 
   // Generate getters and setters
   for(id in params) {
@@ -473,28 +495,15 @@ function Configuration() {
     };
   }
 
-  // Calculates new recovery rate if the recovery improvement is set.
-  this.updateRecoveryRate = function() {
-    this.recoveryRate *= 1 + this.recoveryImprovement;
-    // Round to 4 decimals -- we have to do that, because form uses input type
-    // number with 'step' set to 0.0001, and it is the best precision available.
-    this.recoveryRate = Math.round(this.recoveryRate*10000)/10000
-    if (this.recoveryRate > 1) {
-      this.recoveryRate = 1;
-    }
-    var recoveryRateArea = document.getElementById("recoveryRate");
-    recoveryRateArea.value = (this.recoveryRate);
-  }
-
   //[1"immigrationRate", 2"birthRate", 3"naturalDeathRate",
-  //  4"virusMorbidity", 5"vectoredInfectionRate", 6"contactInfectionRate",
-  //  7"recoveryRate/infectous for x days", 8"recoveryImprovement"];
-  // Loads predefined (provided by authors) settings for few diseases.
+  //  4"virusMorbidity", 5"incubationPeriod", 6"contactInfectionRate",
+  //  7"infectiousPeriod", 8"recoveryImprovement"];
+  // Loads predefined settings for few diseases.
   this.loadPredefinedSettings = function(id) {
     var values;
     if (id == 1) {
       // influenza
-      values = [0.2, 0.0001, 0.0001, 0.002, 0.3, 0.7, 17, 0.004];
+      values = [0.2, 0.0001, 0.0001, 0.002, 2, 0.75, 10, 0.004];
     } else if(id == 2) {
       // smallpox
       values = [0.01, 0.0001, 0.0001, 0.005, 0.3, 0.6, 0.1, 0.01];
@@ -544,16 +553,24 @@ function Epidemic(_config, _grid, _picture) {
   // Show current stats (day, population, infected) under the map.
   this.showStats = function() {
     var pop = Math.round(grid.populationOverallCount/10000)/100;
+    var inc = Math.round(grid.incubatedOverallCount/10000)/100;
     var inf = Math.round(grid.infectedOverallCount/10000)/100;
     var rec = Math.round(grid.recoveredOverallCount/10000)/100;
     var dayArea = document.getElementById("day");
     var popArea = document.getElementById("pop");
+    var incArea = document.getElementById("incubated")
     var infArea = document.getElementById("infected");
     var recArea = document.getElementById("recovered");
     dayArea.innerHTML = ("Day: " + iterationNumber);
     popArea.innerHTML = ("Population: " + pop + "M");
+    incArea.innerHTML = ("Incubated population: " + inc + "M");
     infArea.innerHTML = ("Infected population: " + inf + "M");
     recArea.innerHTML = ("Recovered population: " + rec + "M");
+
+    //check if simulation is finished
+    if (iterationNumber > 150){//smaller than default starting amount
+      this.finished();
+    }
   }
 
   // Generates next step of the simulation.
@@ -562,6 +579,12 @@ function Epidemic(_config, _grid, _picture) {
     picture.updateWithNewData(grid.cells);
     iterationNumber++;
     this.showStats();
+  }
+
+  this.finished = function() {
+    grid.resetCells();
+    picture.updateWithNewData(grid.cells);
+    this.pause();
   }
 
   this.pause = function() {
