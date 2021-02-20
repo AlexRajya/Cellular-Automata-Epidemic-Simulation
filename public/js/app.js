@@ -166,18 +166,16 @@ function Grid() {
   }
   // Updates counts of total population and infected people.
   this.updateOverallCount = function() {
-    populationOverallCount = _.reduce(cells, function(memo, cell) {
-      return memo + cell.populationCount;
-    }, 0);
-    incubatedOverallCount = _.reduce(cells, function(memo, cell) {
-      return memo + cell.incubatedCount;
-    }, 0);
-    infectedOverallCount = _.reduce(cells, function(memo, cell) {
-      return memo + cell.infectedCount;
-    }, 0);
-    recoveredOverallCount = _.reduce(cells, function(memo, cell) {
-      return memo + cell.recoveredCount;
-    }, 0);
+    populationOverallCount = 0;
+    incubatedOverallCount = 0;
+    infectedOverallCount = 0;
+    recoveredOverallCount = 0;
+    for (var i = 0; i < cells.length; i++){
+      populationOverallCount += cells[i].populationCount;
+      incubatedOverallCount += cells[i].incubatedCount;
+      infectedOverallCount += cells[i].infectedCount;
+      recoveredOverallCount += cells[i].recoveredCount;
+    }
   };
 
   // Returns indices of neighbouring cells.
@@ -288,7 +286,8 @@ function Grid() {
       neighbours.push(nearestCities[i]);
       //equal amount go to all neighbours and big city
       var toMove = Math.round((config.immigrationRate * cells[i].populationCount) / neighbours.length);
-      var toMoveInfected = Math.round((config.immigrationRate * cells[i].infectedCount) / neighbours.length);
+      //use seperate immigration rate for ill
+      var toMoveInfected = Math.round((config.illImmigrationRate * cells[i].infectedCount) / neighbours.length);
       for(j = 0; j < neighbours.length; j++) {
         var neighCell = cells[neighbours[j]];
         if (neighCell.populationCount + toMove > neighCell.populationLimit) {
@@ -440,7 +439,7 @@ function Configuration() {
 
   var params = ["immigrationRate", "birthRate", "naturalDeathRate",
     "virusMorbidity", "incPeriod", "contactInfectionRate",
-    "infPeriod", "recoveryImprovement"];
+    "infPeriod", "illImmigrationRate"];
 
   // Generate getters and setters
   for(id in params) {
@@ -461,20 +460,21 @@ function Configuration() {
 
   //[1"immigrationRate", 2"birthRate", 3"naturalDeathRate",
   //  4"virusMorbidity", 5"incubationPeriod", 6"contactInfectionRate",
-  //  7"infectiousPeriod", 8"recoveryImprovement"];
+  //  7"infectiousPeriod", 8"illimmigrationRate"];
   // Loads predefined settings for few diseases.
   this.loadPredefinedSettings = function(id) {
     var values;
     if (id == 1) {
       // influenza
-      values = [0.2, 0.0001, 0.0001, 0.002, 2, 0.7, 5, 0.004];
+      //[0.4, 0.0001, 0.0001, 0.02, 6, 0.8, 14, 0.4];
+      values = [0.4, 0.0001, 0.0001, 0.002, 2, 0.7, 5, 0.2];
     } else if(id == 2) {
       // smallpox
-      values = [0.01, 0.0001, 0.0001, 0.005, 0.3, 0.6, 0.1, 0.01];
+      values = [0.01, 0.0001, 0.0001, 0.005, 0.3, 0.6, 0.1, 0.2];
     } else if(id == 3) {
       // covid
       //verify preset with academic work
-      values = [0.2, 0.0001, 0.0001, 0.02, 5, 0.8, 14, 0.004];
+      values = [0.2, 0.0001, 0.0001, 0.02, 5, 0.85, 10, 0.2];
     }
     for(var id in params) {
       var param = params[id];
@@ -605,7 +605,8 @@ window.onload = () => {
   var oneStepButton = document.getElementById("oneStep");
   var restartButton = document.getElementById("restart");
   var picture = document.getElementById("picture");
-  var selectedVirus = document.getElementById("defaultEpidemics")
+  var selectedVirus = document.getElementById("defaultEpidemics");
+  var selectCountry = document.getElementById("countrySelect");
 
   startButton.addEventListener('click', startPress);
   startDefButton.addEventListener('click', startDefPress);
@@ -614,6 +615,8 @@ window.onload = () => {
   restartButton.addEventListener('click', restartPress);
   picture.addEventListener('click', picturePress);
   selectedVirus.addEventListener('change', virusPress);
+  selectCountry.addEventListener('change', selectPress);
+  
   function startPress(e){
     e.preventDefault();
     epidemic.run();
@@ -644,5 +647,14 @@ window.onload = () => {
   function virusPress(e){
     var val = document.querySelector('input[name="providedEpidemics"]:checked').value;
     config.loadPredefinedSettings(val);
+  }
+  function selectPress(e){
+    var select = document.getElementById("countrySelect");
+    var url = window.location.host;
+    if (select.value == "UK"){
+      window.location.href ="http://"+ url + "/ukIndex.html";
+    }else{
+      window.location.href ="http://"+ url + "/index.html";
+    }
   }
 }
