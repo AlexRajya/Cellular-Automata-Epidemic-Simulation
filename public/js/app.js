@@ -1,39 +1,3 @@
-// Shuffles array
-function shuffle(array) {
-    var tmp, current, top = array.length;
-    if(top) while(--top) {
-      current = Math.floor(Math.random() * (top + 1));
-      tmp = array[current];
-      array[current] = array[top];
-      array[top] = tmp;
-    }
-    return array;
-}
-
-function makeArrayOf(value, length) {
-  var arr = [], i = length;
-  while (i--) {
-    arr[i] = value;
-  }
-  return arr;
-}
-
-function supports_html5_storage() {
-  try {
-    return 'localStorage' in window && window['localStorage'] !== null;
-  } catch (e) {
-    return false;
-  }
-}
-
-function showAlert(msg) {
-  $("#alertText").html(msg);
-  $(".alert").show();
-  setTimeout(function () {
-    $(".alert").hide();
-  }, 2000);
-}
-
 //# Cell class
 // This class represents one cell in the grid.
 function Cell(populationCount, infectedCount, populationLimit) {
