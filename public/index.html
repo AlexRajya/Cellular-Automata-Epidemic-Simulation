@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Epidemic simulation</title>
+<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+<link href="css/main.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" src="js/polish_data.js"></script>
+<script type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
+<script type="text/javascript" src="js/underscore-min.js"></script>
+<script type="text/javascript" src="js/jquery.flot.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/app.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="alert alert-success hide center">
+    <span id="alertText"></span>
+  </div>
+  <h1 class="text-center">Epidemic simulation</h1>
+  <p class="lead text-center">
+  Please click on the map to mark regions as infected. Then use buttons under a map
+  to control the simulation.
+  </p>
+  <div class="row">
+    <div class="span6">
+      <div>
+        <canvas id="picture" width="400" height="360"></canvas>
+        <img id="poland_map" src="img/poland.gif" />
+      </div>
+      <div class="btn-group">
+        <button id="start" href="#" title="Start simulation (s)">Start</button>
+        <button id="startDef" href="#" title="Start Default simulation (s)">Start Preset</button>
+        <button id="pause" href="#" title="Pause (p)">Pause</button>
+        <button id="oneStep" href="#" title="One step forward (n)">Increment</button>
+        <button id="restart" href="#" title="Restart simulation (r)">Refresh</i></button>
+        <button id="clear">Clear</button>
+      </div>
+      <div class="row" id="iterationInfo">
+        <div class="span1" id="day">
+        </div>
+        <div class="span2" id="pop">
+        </div>
+        <div class="span3" id="infected">
+        </div>
+        <div class="span3" id="recovered">
+        </div>
+      </div>
+    </div>
+    <div class="span6" id="defaultEpidemics">
+      You can select one of the provided epidemics:
+      <label class="radio">
+        <input type="radio" name="providedEpidemics" value="1" checked>
+        <span>Influenza</span>
+      </label>
+      <label class="radio">
+        <input type="radio" name="providedEpidemics" value="2">
+        <span>Smallpox</span>
+      </label>
+      <label class="radio">
+        <input type="radio" name="providedEpidemics" value="3">
+        <span>Covid-19</span>
+      </label>
+      or create your own:
+      <legend></legend>
+      <form id="configuration" method="post">
+        <div class="row">
+          <div class="span3">
+            <label>Immigration rate</label>
+            <input required="required" type="number" id="immigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+            <label>Birth rate</label>
+            <input required="required" type="number" id="birthRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+            <label>Natural death rate</label>
+            <input required="required" type="number" id="naturalDeathRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+            <label>Virus morbidity</label>
+            <input required="required" type="number" id="virusMorbidity" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+            <button type="submit" class="btn btn-primary">Save settings</button>
+          </div>
+          <div class="span3">
+            <label>Vectored infection rate</label>
+            <input required="required" type="number" id="vectoredInfectionRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+            <label>Contact infection rate</label>
+            <input required="required" type="number" id="contactInfectionRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+            <label>Recovery rate</label>
+            <input required="required" type="number" id="recoveryRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+            <label>Recovery improvement</label>
+            <input required="required" type="number" id="recoveryImprovement" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+          </div>
+        </div>
+      <form>
+        <fieldset>
+        </fieldset>
+      </form>
+    </div>
+    <div class="span3">
+      <form>
+        <fieldset>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+  <div id="plot"></div>
+</div>
+</body>
+</html>
