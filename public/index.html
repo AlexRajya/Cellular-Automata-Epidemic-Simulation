@@ -6,9 +6,7 @@
 <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
 <link href="css/main.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" src="js/polish_data.js"></script>
-<script type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
 <script type="text/javascript" src="js/underscore-min.js"></script>
-<script type="text/javascript" src="js/jquery.flot.js"></script>
 <script type="text/javascript" src="js/bootstrap.min.js"></script>
 <script type="text/javascript" src="js/app.js"></script>
 </head>
@@ -80,11 +78,11 @@
           </div>
           <div class="span3">
             <label>Incubation Period</label>
-            <input required="required" type="number" id="IncubationPeriod" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+            <input required="required" type="number" id="incPeriod" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
             <label>Contact infection rate</label>
             <input required="required" type="number" id="contactInfectionRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
             <label>Infectious Period</label>
-            <input required="required" type="number" id="InfectiousPeriod" step="0.0001" placeholder="Value over 0">
+            <input required="required" type="number" id="infPeriod" step="0.0001" placeholder="Value over 0">
             <label>Recovery Improvement</label>
             <input required="required" type="number" id="recoveryImprovement" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
           </div>

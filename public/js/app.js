@@ -486,7 +486,8 @@ function Configuration() {
   this.loadSettingsFromForm = function() {
     for (var id in params) {
       var param = params[id];
-      this[param] = parseFloat($("#" + param).val());
+      var paramVal = document.getElementById(param).value;
+      this[param] = parseFloat(paramVal);
     }
   }
 
@@ -495,7 +496,7 @@ function Configuration() {
   this.pushSettingsToForm = function() {
     for (var id in params) {
       var param = params[id];
-      $("#" + param).val(this[param]);
+      document.getElementById(param).value = (this[param]);
     }
   }
 
@@ -565,8 +566,8 @@ function Epidemic(_config, _grid, _picture) {
   }
 
   this.defaultInfected = function() {
-    grid.setAsInfected(500);
-    grid.setAsInfected(750);
+    grid.setAsInfected(500);//roughly top right
+    grid.setAsInfected(800);//roughly bottom left
   }
 
   this.restart = function() {
