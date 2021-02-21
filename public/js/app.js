@@ -330,21 +330,19 @@ function Grid() {
     this.simImmigrations(config);
     // Simulates natural deaths, deaths caused by the virus and new births.
     for(i = 0; i < cellsCount; i++) {
-      var currCell = cells[i];
-      currCell.simNaturalDeaths(config.naturalDeathRate);
-      currCell.simVirusMorbidity(config.virusMorbidity);
-      currCell.simBirths(config.birthRate);
-    }
-    // Simulates new contact and vectored infections. Then simulates recoveries.
-    for(i = 0; i < cellsCount; i++) {
-      var currCell = cells[i];
+      cells[i].simNaturalDeaths(config.naturalDeathRate);
+      cells[i].simVirusMorbidity(config.virusMorbidity);
+      cells[i].simBirths(config.birthRate);
       //percentage of population infected used as a probability
-      var limitContactRate = currCell.infectedCount / currCell.populationCount;
+      var limitContactRate = cells[i].infectedCount / cells[i].populationCount;
       var contactRate = limitContactRate * config.contactInfectionRate
-      currCell.simInfections(contactRate, config.incPeriod);
-      currCell.simRecoveries(config.infPeriod);
+      cells[i].simInfections(contactRate, config.incPeriod);
     }
+
     this.simReturnImmigrations();
+    for(i = 0; i < cellsCount; i++) {
+      cells[i].simRecoveries(config.infPeriod);
+    }
     this.updateOverallCount();
   }
 
@@ -371,7 +369,7 @@ function Grid() {
     this.updateOverallCount();
 
     //find nearest city over pop 50000 for every cell
-    for (var i = 0; i < cells.length; i++){
+    for (var i = 0; i < cellsCount; i++){
       nearestCities.push(this.findClosestBigCity(i));
     }
   }
@@ -466,15 +464,14 @@ function Configuration() {
     var values;
     if (id == 1) {
       // influenza
-      //[0.4, 0.0001, 0.0001, 0.02, 6, 0.8, 14, 0.4];
-      values = [0.4, 0.0001, 0.0001, 0.002, 2, 0.7, 5, 0.2];
+      values = [0.2, 0.0001, 0.0001, 0.002, 2, 0.7, 5, 0.1];
     } else if(id == 2) {
       // smallpox
-      values = [0.01, 0.0001, 0.0001, 0.005, 0.3, 0.6, 0.1, 0.2];
+      values = [0.2, 0.0001, 0.0001, 0.005, 1, 0.6, 4, 0.1];
     } else if(id == 3) {
       // covid
       //verify preset with academic work
-      values = [0.2, 0.0001, 0.0001, 0.02, 5, 0.85, 10, 0.2];
+      values = [0.2, 0.0001, 0.0001, 0.02, 6, 0.85, 14, 0.1];
     }
     for(var id in params) {
       var param = params[id];
@@ -534,7 +531,7 @@ function Epidemic(_config, _grid, _picture) {
     recArea.innerHTML = ("Recovered population: " + rec + "M");
 
     //check if simulation is finished
-    if (iterationNumber > 200){//smaller than default starting amount
+    if ((iterationNumber > 1) && ((inf+inc) == 0)){
       this.finished();
     }
   }
@@ -616,7 +613,7 @@ window.onload = () => {
   picture.addEventListener('click', picturePress);
   selectedVirus.addEventListener('change', virusPress);
   selectCountry.addEventListener('change', selectPress);
-  
+
   function startPress(e){
     e.preventDefault();
     epidemic.run();
