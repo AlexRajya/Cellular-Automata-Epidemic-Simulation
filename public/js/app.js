@@ -471,7 +471,7 @@ function Configuration() {
     } else if(id == 3) {
       // covid
       //verify preset with academic work
-      values = [0.2, 0.0001, 0.0001, 0.02, 6, 0.85, 14, 0.1];
+      values = [0.2, 0.0001, 0.0001, 0.01, 6, 0.85, 14, 0.1];
     }
     for(var id in params) {
       var param = params[id];
