@@ -166,6 +166,7 @@ function Grid() {
   }
   // Updates counts of total population and infected people.
   this.updateOverallCount = function() {
+    //reset counts
     populationOverallCount = 0;
     incubatedOverallCount = 0;
     infectedOverallCount = 0;
@@ -283,7 +284,13 @@ function Grid() {
     for (var i = 0; i < cells.length; i++){
       var neighbours = this.getNeighbours(i);
       //push nearest big city as a neighbour
-      neighbours.push(nearestCities[i]);
+      //big cities are of cell size 3x3 average (check with research)
+      //original model uses neighbours.push(nearestCities[i])
+      var bigCity = this.getNeighbours(nearestCities[i]);
+      for (var j = 0; j < bigCity.length; j++){
+        neighbours.push(bigCity[j]);
+      }
+
       //equal amount go to all neighbours and big city
       var toMove = Math.round((config.immigrationRate * cells[i].populationCount) / neighbours.length);
       //use seperate immigration rate for ill
@@ -359,16 +366,17 @@ function Grid() {
   this.init = function() {
     // constructor
     var avg = 26000;
-    for(i = 0; i < cellsCount; i++) {
+    for(var i = 0; i < cellsCount; i++) {
       cells[i] = new Cell(avg, 0, avg * 2.5);
     }
-    _.each(cellsPopulation, function(value, key) {
-      cells[key].populationCount = value;
-      cells[key].populationLimit = value * 2.5;
-    }, this);
+    //Assign population to each cell
+    for (var i = 0; i < cellsCount; i++){
+      cells[i].populationCount = cellsPopulation[i];
+      cells[i].populationLimit = cellsPopulation[i] * 2.5;
+    }
     this.updateOverallCount();
 
-    //find nearest city over pop 50000 for every cell
+    //find nearest city over population 50000 for every cell
     for (var i = 0; i < cellsCount; i++){
       nearestCities.push(this.findClosestBigCity(i));
     }
@@ -464,14 +472,10 @@ function Configuration() {
     var values;
     if (id == 1) {
       // influenza
-      values = [0.2, 0.0001, 0.0001, 0.002, 2, 0.7, 5, 0.1];
+      values = [0.3, 0.0001, 0.0001, 0.002, 2, 0.6, 5, 0.1];
     } else if(id == 2) {
-      // smallpox
-      values = [0.2, 0.0001, 0.0001, 0.005, 1, 0.6, 4, 0.1];
-    } else if(id == 3) {
       // covid
-      //verify preset with academic work
-      values = [0.2, 0.0001, 0.0001, 0.01, 6, 0.85, 14, 0.1];
+      values = [0.3, 0.0001, 0.0001, 0.015, 3, 0.8, 9, 0.1];
     }
     for(var id in params) {
       var param = params[id];
@@ -603,7 +607,7 @@ window.onload = () => {
   var restartButton = document.getElementById("restart");
   var picture = document.getElementById("picture");
   var selectedVirus = document.getElementById("defaultEpidemics");
-  var selectCountry = document.getElementById("countrySelect");
+  var settingButton = document.getElementById("settingButton");
 
   startButton.addEventListener('click', startPress);
   startDefButton.addEventListener('click', startDefPress);
@@ -612,7 +616,7 @@ window.onload = () => {
   restartButton.addEventListener('click', restartPress);
   picture.addEventListener('click', picturePress);
   selectedVirus.addEventListener('change', virusPress);
-  selectCountry.addEventListener('change', selectPress);
+  settingButton.addEventListener('click', settingPress);
 
   function startPress(e){
     e.preventDefault();
@@ -645,13 +649,7 @@ window.onload = () => {
     var val = document.querySelector('input[name="providedEpidemics"]:checked').value;
     config.loadPredefinedSettings(val);
   }
-  function selectPress(e){
-    var select = document.getElementById("countrySelect");
-    var url = window.location.host;
-    if (select.value == "UK"){
-      window.location.href ="http://"+ url + "/ukIndex.html";
-    }else{
-      window.location.href ="http://"+ url + "/index.html";
-    }
+  function settingPress(e){
+    config.loadSettingsFromForm();
   }
 }
