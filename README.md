@@ -1,1 +1,1 @@
-# UK-Coronavirus-Simulation
+# Cellular-Automata-Coronavirus-Simulation
