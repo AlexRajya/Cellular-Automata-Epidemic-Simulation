@@ -533,7 +533,9 @@ function Epidemic(_config, _grid, _picture) {
     incArea.innerHTML = ("Incubated population: " + inc + "M");
     infArea.innerHTML = ("Infected population: " + inf + "M");
     recArea.innerHTML = ("Recovered population: " + rec + "M");
-
+    //Append data to graph dataset
+    dayData.push(iterationNumber);
+    infData.push(inf);
     //check if simulation is finished
     if ((iterationNumber > 1) && ((inf+inc) == 0)){
       this.finished();
@@ -552,6 +554,21 @@ function Epidemic(_config, _grid, _picture) {
     grid.resetCells();
     picture.updateWithNewData(grid.cells);
     this.pause();
+    var ctx = document.getElementById("graph").getContext('2d');
+
+    var chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: dayData,
+          datasets: [{
+              label: 'Infected',
+              backgroundColor: 'rgb(0, 153, 255)',
+              borderColor: 'rgb(0, 153, 255)',
+              data: infData
+          }]
+      },
+      options: {}
+    });
   }
 
   this.pause = function() {
@@ -586,6 +603,8 @@ function Epidemic(_config, _grid, _picture) {
   var picture = _picture;
   var iterationNumber = 0;
   var running = false;
+  var infData = [];
+  var dayData = [];
   this.init();
 }
 

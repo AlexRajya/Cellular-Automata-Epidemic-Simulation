@@ -1,9 +1,4 @@
-.alert { position: fixed; }
-.text-center { text-align: center; }
-.lead { font-size: 18px; }
-.text-right { text-align: right; }
 #picture { position: absolute; }
-#plot { width: 940px; height: 190px; }
 #cellInfo, #cellAddIllInfo { position: absolute; }
 .radio.inline+.radio.inline, .checkbox.inline+.checkbox.inline { margin-left: 20; }
 .radio.inline { margin-left: 10px; }
@@ -36,6 +31,7 @@
   width: 75%;
   font-size: 110%;
 }
+
 img {
   align-items: center;
 }
@@ -55,11 +51,47 @@ p {
   font-size: 100%;
 }
 
-body {
+html, body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
   background-color: #d6d6d6;
 }
 
 h1, h2, h3 {
-  margin-top: 0.3%;
-  margin-bottom: 0.3%;
+  margin-top: 0;
+  padding-top: 0.15%;
+  padding-bottom: 0.15%;
+  padding-left: 0;
+  padding-right: 0;
+  margin-bottom: 0;
+}
+
+.simArea {
+  margin: 1%;
+}
+
+.setArea {
+  margin: 1%;
+}
+
+.graph {
+  width: 50%;
+}
+
+.header {
+  width: 100%;
+  position: relative;
+  margin: 0;
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 0.1%;
+  padding-bottom: 0.1%;
+  text-align: center;
+  background-color: #0099ff;
+}
+
+*, *:before, *:after {
+  box-sizing: border-box;
 }
