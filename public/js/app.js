@@ -548,24 +548,15 @@ function Epidemic(_config, _grid, _picture) {
     picture.updateWithNewData(grid.cells);
     iterationNumber++;
     this.showStats();
+    this.drawGraph();
   }
 
   //draw graph
   this.drawGraph = function() {
-    var ctx = document.getElementById("graph").getContext('2d');
-    var chart = new Chart(ctx, {
-      type: 'line',
-      data: {
-          labels: dayData,
-          datasets: [{
-              label: 'Infected',
-              backgroundColor: 'rgb(0, 153, 255)',
-              borderColor: 'rgb(0, 153, 255)',
-              data: infData
-          }]
-      },
-      options: {}
-    });
+    chart.data.labels = dayData;
+    chart.data.datasets[0].data = infData;
+    chart.data.datasets[0].label = "Infected";
+    chart.update();
   }
 
   this.finished = function() {
@@ -631,21 +622,11 @@ function Epidemic(_config, _grid, _picture) {
         avgInf.push(dayAverage);
       }
 
-      //Draw graph of averages
-      var ctx = document.getElementById("graph").getContext('2d');
-      var chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: day100[longestIndex],
-            datasets: [{
-                label: 'Average Infected of 100 simulations',
-                backgroundColor: 'rgb(0, 153, 255)',
-                borderColor: 'rgb(0, 153, 255)',
-                data: avgInf
-            }]
-        },
-        options: {}
-      });
+      //update graph with averages
+      chart.data.labels = day100[longestIndex];
+      chart.data.datasets[0].data = avgInf;
+      chart.data.datasets[0].label = "Average infected from 100 runs";
+      chart.update();
     }else{
       repeat = true;
       repeatCount++;
@@ -659,6 +640,9 @@ function Epidemic(_config, _grid, _picture) {
     iterationNumber = 0;
     this.init();
     this.showStats();
+    dayData = [];
+    infData = [];
+    this.drawGraph;
   }
 
   // constructor
@@ -673,6 +657,21 @@ function Epidemic(_config, _grid, _picture) {
   var day100 = [];
   var repeat = false;
   var repeatCount = 0;
+  //init graph using chart.js
+  var ctx = document.getElementById("graph").getContext('2d');
+  var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Infected',
+            backgroundColor: 'rgb(0, 153, 255)',
+            borderColor: 'rgb(0, 153, 255)',
+            data: []
+        }]
+    },
+    options: {}
+  });
   this.init();
 }
 
@@ -696,21 +695,6 @@ window.onload = () => {
   var selectedVirus = document.getElementById("defaultEpidemics");
   var settingButton = document.getElementById("settingButton");
   var run100 = document.getElementById("run100");
-  var ctx = document.getElementById("graph").getContext('2d');
-
-  var chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Infected',
-            backgroundColor: 'rgb(0, 153, 255)',
-            borderColor: 'rgb(0, 153, 255)',
-            data: []
-        }]
-    },
-    options: {}
-  });
 
   startButton.addEventListener('click', startPress);
   startDefButton.addEventListener('click', startDefPress);
