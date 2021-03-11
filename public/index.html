@@ -13,75 +13,87 @@
 
   <body>
       <div class="header">
-        <h1>Epidemic simulation of Poland</h1>
+        <h1>Epidemic simulation using 2D Cellular Automata</h1>
         <p>
           To use simulation either click on the map to add infected then press the "start button"
           or simply click the "Start preset" button
         </p>
       </div>
       <div class="simArea">
-        <div>
-          <canvas id="picture" width="400" height="360"></canvas>
+        <div class="imgArea">
+          <canvas id="picture" width="400" height="358"></canvas>
           <img id="poland_map" src="img/poland.png" />
         </div>
-        <div class="btn-group">
+        <div class="graph">
+          <canvas id="graph"></canvas>
+        </div>
+      </div>
+      <div class="simArea">
+        <div class="buttons">
           <button id="start" href="#" title="Start simulation (s)">Start</button>
           <button id="startDef" href="#" title="Start Default simulation (s)">Start Preset</button>
           <button id="pause" href="#" title="Pause (p)">Pause</button>
           <button id="oneStep" href="#" title="One step forward (n)">Increment</button>
           <button id="restart" href="#" title="Restart simulation (r)">Refresh</i></button>
           <button id="clear">Clear</button>
+          <div id="iterationInfo">
+            <h2>Simulation Stats: </h2>
+            <b>
+              <div id="day"></div>
+              <div id="pop"></div>
+              <div id="incubated"></div>
+              <div id="infected"></div>
+              <div id="recovered"></div>
+            </b>
+          </div>
+          <p></p>
+          <h3> Presets: </h3>
+          <div id="defaultEpidemics">
+            <label class="radio">
+              <input type="radio" name="providedEpidemics" value="1" checked>
+              <span>Influenza</span>
+            </label>
+            <p></p>
+            <label class="radio">
+              <input type="radio" name="providedEpidemics" value="2">
+              <span>Covid-19</span>
+            </label>
+          </div>
         </div>
-        <h2>Simulation Stats: </h2>
-        <div class="infoArea" id="iterationInfo">
-          <b>
-            <div id="day"></div>
-            <div id="pop"></div>
-            <div id="incubated"></div>
-            <div id="infected"></div>
-            <div id="recovered"></div>
-          </b>
+        <div class="infoArea">
+          <h3> Custom configuration: </h3>
+          <form id="configuration" method="post">
+              <label>Immigration rate</label>
+              <input required="required" type="number" id="immigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+              <p></p>
+              <label>Birth rate</label>
+              <input required="required" type="number" id="birthRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+              <p></p>
+              <label>Natural death rate</label>
+              <input required="required" type="number" id="naturalDeathRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+              <p></p>
+              <label>Virus morbidity</label>
+              <input required="required" type="number" id="virusMorbidity" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+              <p></p>
+              <label>Incubation Period</label>
+              <input required="required" type="number" id="incPeriod" step="0.0001" placeholder="Value over 0">
+              <p></p>
+              <label>Contact infection rate</label>
+              <input required="required" type="number" id="contactInfectionRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+              <p></p>
+              <label>Infectious Period</label>
+              <input required="required" type="number" id="infPeriod" step="0.0001" placeholder="Value over 0">
+              <p></p>
+              <label>Ill Immigration rate</label>
+              <input required="required" type="number" id="illImmigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
+          </form>
+          <button id="settingButton">Save settings</button>
         </div>
       </div>
 
-      <div class="setArea">
-        <h2> Settings </h2>
-        <h3> Presets: </h3>
-        <div id="defaultEpidemics">
-          You can select one of the provided epidemics:
-          <label class="radio">
-            <input type="radio" name="providedEpidemics" value="1" checked>
-            <span>Influenza</span>
-          </label>
-          <label class="radio">
-            <input type="radio" name="providedEpidemics" value="2">
-            <span>Covid-19</span>
-          </label>
-        </div>
-        <h3> Custom configuration: </h3>
-        <form id="configuration" method="post">
-            <label>Immigration rate</label>
-            <input required="required" type="number" id="immigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-            <label>Birth rate</label>
-            <input required="required" type="number" id="birthRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-            <label>Natural death rate</label>
-            <input required="required" type="number" id="naturalDeathRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-            <label>Virus morbidity</label>
-            <input required="required" type="number" id="virusMorbidity" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-            <p></p>
-            <label>Incubation Period</label>
-            <input required="required" type="number" id="incPeriod" step="0.0001" placeholder="Value over 0">
-            <label>Contact infection rate</label>
-            <input required="required" type="number" id="contactInfectionRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-            <label>Infectious Period</label>
-            <input required="required" type="number" id="infPeriod" step="0.0001" placeholder="Value over 0">
-            <label>Ill Immigration rate</label>
-            <input required="required" type="number" id="illImmigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-        </form>
-        <button id="settingButton">Save settings</button>
-      </div>
-      <div class="graph">
-        <canvas id="graph"></canvas>
+      <div class="header">
+        <p>Made by Alex Rajya</p>
+        <a href="https://github.com/AlexRajya">GitHub</a>
       </div>
   </body>
 </html>

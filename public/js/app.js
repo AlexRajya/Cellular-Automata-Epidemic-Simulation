@@ -548,14 +548,11 @@ function Epidemic(_config, _grid, _picture) {
     picture.updateWithNewData(grid.cells);
     iterationNumber++;
     this.showStats();
+    this.drawGraph();
   }
 
-  this.finished = function() {
-    grid.resetCells();
-    picture.updateWithNewData(grid.cells);
-    this.pause();
+  this.drawGraph = function() {
     var ctx = document.getElementById("graph").getContext('2d');
-
     var chart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -569,6 +566,13 @@ function Epidemic(_config, _grid, _picture) {
       },
       options: {}
     });
+  }
+
+  this.finished = function() {
+    grid.resetCells();
+    picture.updateWithNewData(grid.cells);
+    this.pause();
+    this.drawGraph();
   }
 
   this.pause = function() {
@@ -627,6 +631,21 @@ window.onload = () => {
   var picture = document.getElementById("picture");
   var selectedVirus = document.getElementById("defaultEpidemics");
   var settingButton = document.getElementById("settingButton");
+  var ctx = document.getElementById("graph").getContext('2d');
+
+  var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Infected',
+            backgroundColor: 'rgb(0, 153, 255)',
+            borderColor: 'rgb(0, 153, 255)',
+            data: []
+        }]
+    },
+    options: {}
+  });
 
   startButton.addEventListener('click', startPress);
   startDefButton.addEventListener('click', startDefPress);
