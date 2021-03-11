@@ -514,7 +514,7 @@ function Epidemic(_config, _grid, _picture) {
   this.run = function() {
     running = true
     var that = this;
-    this.interval = setInterval(function() { that.nextStep()}, 50 );
+    this.interval = setInterval(function() { that.nextStep()}, 60 );
   }
 
   // Show current stats (day, population, infected) under the map.
@@ -548,9 +548,9 @@ function Epidemic(_config, _grid, _picture) {
     picture.updateWithNewData(grid.cells);
     iterationNumber++;
     this.showStats();
-    this.drawGraph();
   }
 
+  //draw graph
   this.drawGraph = function() {
     var ctx = document.getElementById("graph").getContext('2d');
     var chart = new Chart(ctx, {
@@ -573,6 +573,15 @@ function Epidemic(_config, _grid, _picture) {
     picture.updateWithNewData(grid.cells);
     this.pause();
     this.drawGraph();
+    //check if user is running repeating simulations
+    if (repeat == true){
+      this.restart();
+      this.run100();
+      inf100.push(infData);
+      day100.push(dayData);
+      dayData = [];
+      infData = [];
+    }
   }
 
   this.pause = function() {
@@ -594,6 +603,57 @@ function Epidemic(_config, _grid, _picture) {
     grid.setAsInfected(800);//roughly bottom left
   }
 
+  //iteratively call this function until 100 runs have been done
+  //then draw results of the averages from the 100 runs
+  this.run100 = function() {
+    if (repeatCount == 100){
+      repeat = false;
+      repeatCount = 0;
+      //identify max length of days out of all simulations
+      var longest = 0;
+      var longestIndex;
+      for (var i = 0; i < day100.length; i++){
+        if (day100[i].length > longest){
+          longest = day100[i].length;
+          longestIndex = i;
+        }
+      }
+      //get average of all days
+      var avgInf = [];
+      var dayAverage;
+      for (var i = 0; i < longest; i++){
+        dayAverage = 0;
+        for (var j = 0; j < inf100.length; j++){
+          if ((inf100[j][i]) != undefined){
+            dayAverage += inf100[j][i];
+          }
+        }
+        avgInf.push(dayAverage);
+      }
+
+      //Draw graph of averages
+      var ctx = document.getElementById("graph").getContext('2d');
+      var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: day100[longestIndex],
+            datasets: [{
+                label: 'Average Infected of 100 simulations',
+                backgroundColor: 'rgb(0, 153, 255)',
+                borderColor: 'rgb(0, 153, 255)',
+                data: avgInf
+            }]
+        },
+        options: {}
+      });
+    }else{
+      repeat = true;
+      repeatCount++;
+      this.defaultInfected();
+      this.run();
+    }
+  }
+
   this.restart = function() {
     grid.resetCells();
     iterationNumber = 0;
@@ -609,6 +669,10 @@ function Epidemic(_config, _grid, _picture) {
   var running = false;
   var infData = [];
   var dayData = [];
+  var inf100 = [];
+  var day100 = [];
+  var repeat = false;
+  var repeatCount = 0;
   this.init();
 }
 
@@ -631,6 +695,7 @@ window.onload = () => {
   var picture = document.getElementById("picture");
   var selectedVirus = document.getElementById("defaultEpidemics");
   var settingButton = document.getElementById("settingButton");
+  var run100 = document.getElementById("run100");
   var ctx = document.getElementById("graph").getContext('2d');
 
   var chart = new Chart(ctx, {
@@ -655,6 +720,7 @@ window.onload = () => {
   picture.addEventListener('click', picturePress);
   selectedVirus.addEventListener('change', virusPress);
   settingButton.addEventListener('click', settingPress);
+  run100.addEventListener('click', run100Press);
 
   function startPress(e){
     e.preventDefault();
@@ -689,5 +755,8 @@ window.onload = () => {
   }
   function settingPress(e){
     config.loadSettingsFromForm();
+  }
+  function run100Press(e){
+    epidemic.run100();
   }
 }
