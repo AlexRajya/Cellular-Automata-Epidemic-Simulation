@@ -442,7 +442,6 @@ function Picture(_cols, _rows) {
 
 // # Configuration class
 function Configuration() {
-
   var params = ["immigrationRate", "birthRate", "naturalDeathRate",
     "virusMorbidity", "incPeriod", "contactInfectionRate",
     "infPeriod", "illImmigrationRate"];
@@ -508,6 +507,34 @@ function Configuration() {
 
 // # Epidemic class
 function Epidemic(_config, _grid, _picture) {
+  var config = _config;
+  var grid = _grid;
+  var picture = _picture;
+  var iterationNumber = 0;
+  var running = false;
+  var infData = [];
+  var dayData = [];
+  var inf100 = [];
+  var day100 = [];
+  var avgComplete = false;
+  var repeat = false;
+  var repeatCount = 0;
+  //init graph using chart.js
+  var ctx = document.getElementById("graph").getContext('2d');
+  var chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Infected',
+            backgroundColor: 'rgb(0, 153, 255)',
+            borderColor: 'rgb(0, 153, 255)',
+            data: []
+        }]
+    },
+    options: {}
+  });
+
   this.init = function() {
     picture.updateWithNewData(grid.cells);
   }
@@ -536,6 +563,7 @@ function Epidemic(_config, _grid, _picture) {
     //Append data to graph dataset
     dayData.push(iterationNumber);
     infData.push(inf);
+    this.drawGraph(dayData, infData, "Infected");
     //check if simulation is finished
     if ((iterationNumber > 1) && ((inf+inc) == 0)){
       this.finished();
@@ -548,14 +576,13 @@ function Epidemic(_config, _grid, _picture) {
     picture.updateWithNewData(grid.cells);
     iterationNumber++;
     this.showStats();
-    this.drawGraph();
   }
 
   //draw graph
-  this.drawGraph = function() {
-    chart.data.labels = dayData;
+  this.drawGraph = function(labels, data, dataLabel) {
+    chart.data.labels = labels;
     chart.data.datasets[0].data = infData;
-    chart.data.datasets[0].label = "Infected";
+    chart.data.datasets[0].label = dataLabel;
     chart.update();
   }
 
@@ -563,15 +590,11 @@ function Epidemic(_config, _grid, _picture) {
     grid.resetCells();
     picture.updateWithNewData(grid.cells);
     this.pause();
-    this.drawGraph();
     //check if user is running repeating simulations
     if (repeat == true){
-      this.restart();
-      this.run100();
       inf100.push(infData);
       day100.push(dayData);
-      dayData = [];
-      infData = [];
+      this.run100();
     }
   }
 
@@ -598,8 +621,6 @@ function Epidemic(_config, _grid, _picture) {
   //then draw results of the averages from the 100 runs
   this.run100 = function() {
     if (repeatCount == 100){
-      repeat = false;
-      repeatCount = 0;
       //identify max length of days out of all simulations
       var longest = 0;
       var longestIndex;
@@ -619,17 +640,20 @@ function Epidemic(_config, _grid, _picture) {
             dayAverage += inf100[j][i];
           }
         }
-        avgInf.push(dayAverage);
+        //round to 2 decimal places and append
+        avgInf.push(Math.round(dayAverage/(inf100.length) * 100)/100);
       }
-
       //update graph with averages
-      chart.data.labels = day100[longestIndex];
-      chart.data.datasets[0].data = avgInf;
-      chart.data.datasets[0].label = "Average infected from 100 runs";
-      chart.update();
+      this.drawGraph(day100[longestIndex], avgInf, "Avg-Infected");
+      //Reset vars
+      repeat = false;
+      repeatCount = 0;
+      day100 = [];
+      inf100 = [];
     }else{
       repeat = true;
       repeatCount++;
+      this.restart();
       this.defaultInfected();
       this.run();
     }
@@ -642,39 +666,10 @@ function Epidemic(_config, _grid, _picture) {
     this.showStats();
     dayData = [];
     infData = [];
-    this.drawGraph;
   }
 
-  // constructor
-  var config = _config;
-  var grid = _grid;
-  var picture = _picture;
-  var iterationNumber = 0;
-  var running = false;
-  var infData = [];
-  var dayData = [];
-  var inf100 = [];
-  var day100 = [];
-  var repeat = false;
-  var repeatCount = 0;
-  //init graph using chart.js
-  var ctx = document.getElementById("graph").getContext('2d');
-  var chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Infected',
-            backgroundColor: 'rgb(0, 153, 255)',
-            borderColor: 'rgb(0, 153, 255)',
-            data: []
-        }]
-    },
-    options: {}
-  });
   this.init();
 }
-
 
 window.onload = () => {
   var config = new Configuration();
