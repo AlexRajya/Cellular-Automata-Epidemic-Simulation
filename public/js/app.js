@@ -478,10 +478,10 @@ function Configuration() {
     var values;
     if (id == 1) {
       // influenza
-      values = [0.3, 0.0001, 0.0001, 0.002, 2, 0.6, 5, 0.1];
+      values = [0.3, 0.0001, 0.0001, 0.002, 2, 0.5, 5, 0.1];
     } else if(id == 2) {
       // covid
-      values = [0.3, 0.0001, 0.0001, 0.015, 3, 0.8, 9, 0.1];
+      values = [0.3, 0.0001, 0.0001, 0.015, 3, 0.7, 9, 0.1];
     }
     for(var id in params) {
       var param = params[id];
