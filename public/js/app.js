@@ -285,11 +285,12 @@ function Grid() {
       var neighbours = this.getNeighbours(i);
       //push nearest big city as a neighbour
       //big cities are of cell size 3x3 average (check with research)
-      //original model uses neighbours.push(nearestCities[i])
-      var bigCity = this.getNeighbours(nearestCities[i]);
-      for (var j = 0; j < bigCity.length; j++){
-        neighbours.push(bigCity[j]);
-      }
+      //Improved:
+      //var bigCity = this.getNeighbours(nearestCities[i]);
+      //for (var j = 0; j < bigCity.length; j++){
+      //  neighbours.push(bigCity[j]);
+      //}
+      neighbours.push(nearestCities[i])
 
       //equal amount go to all neighbours and big city
       var toMove = Math.round((config.immigrationRate * cells[i].populationCount) / neighbours.length);
@@ -422,6 +423,12 @@ function Picture(_cols, _rows) {
                       sizeY, sizeX, sizeY);
         ctx.fillRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
                      sizeY, sizeX, sizeY);
+      }else{
+        ctx.fillStyle = "rgba(200,200,200,1)";
+        ctx.clearRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
+                      sizeY, sizeX, sizeY);
+        ctx.fillRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
+                     sizeY, sizeX, sizeY);
       }
     }
   }
@@ -513,6 +520,8 @@ function Epidemic(_config, _grid, _picture) {
   var iterationNumber = 0;
   var running = false;
   var infData = [];
+  var incData = [];
+  var recData = [];
   var dayData = [];
   var inf100 = [];
   var day100 = [];
@@ -520,13 +529,43 @@ function Epidemic(_config, _grid, _picture) {
   var repeat = false;
   var repeatCount = 0;
   //init graph using chart.js
-  var ctx = document.getElementById("graph").getContext('2d');
+  var ctx = document.getElementById("infGraph").getContext('2d');
   var chart = new Chart(ctx, {
     type: 'line',
     data: {
         labels: [],
         datasets: [{
             label: 'Infected',
+            backgroundColor: 'rgb(241, 30, 30)',
+            borderColor: 'rgb(241, 30, 30)',
+            data: []
+        }]
+    },
+    options: {}
+  });
+
+  var ctx2 = document.getElementById("incGraph").getContext('2d');
+  var chart2 = new Chart(ctx2, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Incubated',
+            backgroundColor: 'rgb(246, 158, 35)',
+            borderColor: 'rgb(246, 158, 35)',
+            data: []
+        }]
+    },
+    options: {}
+  });
+
+  var ctx3 = document.getElementById("recGraph").getContext('2d');
+  var chart3 = new Chart(ctx3, {
+    type: 'line',
+    data: {
+        labels: [],
+        datasets: [{
+            label: 'Recovered',
             backgroundColor: 'rgb(0, 153, 255)',
             borderColor: 'rgb(0, 153, 255)',
             data: []
@@ -563,7 +602,12 @@ function Epidemic(_config, _grid, _picture) {
     //Append data to graph dataset
     dayData.push(iterationNumber);
     infData.push(inf);
-    this.drawGraph(dayData, infData, "Infected");
+    incData.push(inc);
+    recData.push(rec);
+    //Draw graphs
+    this.drawInfGraph(dayData, infData, "Infected");
+    this.drawIncGraph(dayData, incData, "Incubated");
+    this.drawRecGraph(dayData, recData, "Recovered");
     //check if simulation is finished
     if ((iterationNumber > 1) && ((inf+inc) == 0)){
       this.finished();
@@ -579,11 +623,25 @@ function Epidemic(_config, _grid, _picture) {
   }
 
   //draw graph
-  this.drawGraph = function(labels, data, dataLabel) {
+  this.drawInfGraph = function(labels, data, dataLabel) {
     chart.data.labels = labels;
-    chart.data.datasets[0].data = infData;
+    chart.data.datasets[0].data = data;
     chart.data.datasets[0].label = dataLabel;
     chart.update();
+  }
+
+  this.drawIncGraph = function(labels, data, dataLabel) {
+    chart2.data.labels = labels;
+    chart2.data.datasets[0].data = data;
+    chart2.data.datasets[0].label = dataLabel;
+    chart2.update();
+  }
+
+  this.drawRecGraph = function(labels, data, dataLabel) {
+    chart3.data.labels = labels;
+    chart3.data.datasets[0].data = data;
+    chart3.data.datasets[0].label = dataLabel;
+    chart3.update();
   }
 
   this.finished = function() {
@@ -644,7 +702,7 @@ function Epidemic(_config, _grid, _picture) {
         avgInf.push(Math.round(dayAverage/(inf100.length) * 100)/100);
       }
       //update graph with averages
-      this.drawGraph(day100[longestIndex], avgInf, "Avg-Infected");
+      this.drawInfGraph(day100[longestIndex], avgInf, "Avg-Infected");
       //Reset vars
       repeat = false;
       repeatCount = 0;

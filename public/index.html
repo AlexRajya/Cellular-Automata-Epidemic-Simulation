@@ -12,84 +12,104 @@
   </head>
 
   <body>
-      <div class="header">
+    <div class="grid-container">
+      <div class="grid-header">
         <h1>Epidemic simulation using 2D Cellular Automata</h1>
         <p>
-          To use simulation either click on the map to add infected then press the "start button"
+          To use simulation click on white area of the map to add infected then press the "start button"
           or simply click the "Start preset" button
         </p>
       </div>
-      <div class="simArea">
+      <div class="grid-simArea">
         <div class="imgArea">
-          <canvas id="picture" width="400" height="358"></canvas>
-          <img id="poland_map" src="img/poland.png" />
-        </div>
-        <div class="graph">
-          <canvas id="graph"></canvas>
+          <canvas id="picture" width="475" height="475" class="canv"></canvas>
         </div>
       </div>
-      <div class="simArea">
-        <div class="buttons">
-          <button id="start" href="#" title="Start simulation">Start</button>
-          <button id="startDef" href="#" title="Start Default simulation">Start Preset</button>
-          <button id="run100" href="#" title="Start Default simulation 100 times">Run Preset 100 times</button>
-          <button id="pause" href="#" title="Pause">Pause</button>
-          <button id="oneStep" href="#" title="One step forward">Increment</button>
-          <button id="restart" href="#" title="Restart simulation">Refresh</i></button>
-          <button id="clear">Clear</button>
-          <div id="iterationInfo">
-            <h2>Simulation Stats: </h2>
-            <b>
-              <div id="day"></div>
-              <div id="pop"></div>
-              <div id="incubated"></div>
-              <div id="infected"></div>
-              <div id="recovered"></div>
-            </b>
-          </div>
-          <p></p>
-          <h3> Presets: </h3>
-          <div id="defaultEpidemics">
-            <label class="radio">
-              <input type="radio" name="providedEpidemics" value="1" checked>
-              <span>Influenza</span>
-            </label>
+      <div class="grid-graph">
+        <canvas id="infGraph"></canvas>
+        <canvas id="incGraph"></canvas>
+      </div>
+      <div class="grid-graph2">
+        <canvas id="recGraph"></canvas>
+        <div id="iterationInfo" class="grid-stats">
+          <b>
+            <div id="day"></div>
             <p></p>
-            <label class="radio">
-              <input type="radio" name="providedEpidemics" value="2">
-              <span>Covid-19</span>
-            </label>
-          </div>
+            <div id="pop"></div>
+            <p></p>
+            <div id="incubated"></div>
+            <p></p>
+            <div id="infected"></div>
+            <p></p>
+            <div id="recovered"></div>
+          </b>
         </div>
-        <div class="infoArea">
+      </div>
+      <div class="grid-buttons">
+        <button id="start" href="#" title="Start simulation">Start</button>
+        <button id="pause" href="#" title="Pause">Pause</button>
+        <button id="oneStep" href="#" title="One step forward">Increment</button>
+        <button id="restart" href="#" title="Restart simulation">Refresh</i></button>
+        <p></p>
+        <button id="startDef" href="#" title="Start Default simulation">Start Preset: </button>
+        <button id="run100" href="#" title="Start Default simulation 100 times">100 times</button>
+        <button id="run100" href="#" title="Start Default simulation 100 times">10 times</button>
+        <p>
+          <b>Country: </b>
+          <span>
+            <select name="countries" id="countrySelect">
+               <option value="Poland">Poland</option>
+               <option value="UK">UK</option>
+            </select>
+         </span>
+      </p>
+      </div>
+      <div class="grid-presets">
+        <h3> Presets: </h3>
+        <div id="defaultEpidemics">
+          <label class="radio">
+            <input type="radio" name="providedEpidemics" value="1" checked>
+            <span>Influenza</span>
+          </label>
+          <label class="radio">
+            <input type="radio" name="providedEpidemics" value="2">
+            <span>Covid-19</span>
+          </label>
+          <p></p>
+          <label class="radio">
+            <input type="radio" name="providedEpidemics" value="2">
+            <span>Covid-19 Lockdown</span>
+          </label>
+          <label class="radio">
+            <input type="radio" name="providedEpidemics" value="2">
+            <span>Covid-19 Masks</span>
+          </label>
+        </div>
+      </div>
+      <div class="grid-config">
           <h3> Custom configuration: </h3>
           <form id="configuration" method="post">
               <label>Immigration rate</label>
               <input required="required" type="number" id="immigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
               <label>Birth rate</label>
               <input required="required" type="number" id="birthRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
               <label>Natural death rate</label>
               <input required="required" type="number" id="naturalDeathRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
               <p></p>
               <label>Virus morbidity</label>
               <input required="required" type="number" id="virusMorbidity" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
               <label>Incubation Period</label>
               <input required="required" type="number" id="incPeriod" step="0.0001" placeholder="Value over 0">
-              <p></p>
               <label>Contact infection rate</label>
               <input required="required" type="number" id="contactInfectionRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
               <p></p>
               <label>Infectious Period</label>
               <input required="required" type="number" id="infPeriod" step="0.0001" placeholder="Value over 0">
-              <p></p>
               <label>Ill Immigration rate</label>
               <input required="required" type="number" id="illImmigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
           </form>
           <button id="settingButton">Save settings</button>
-        </div>
       </div>
+    </div>
   </body>
 </html>
