@@ -1,3 +1,37 @@
+//Functions to generate randoms
+function randomizeProbWithNormalDistribution(mu, varCoeff) {
+  var stddev = mu*varCoeff;
+  var prob = normal_random(mu, stddev*stddev);
+  if (prob > 1) {
+    prob = 1;
+  }
+  if (prob < 0) {
+    prob = 0;
+  }
+  return prob;
+}
+
+function normal_random(mean, variance) {
+  if (mean == undefined)
+    mean = 0.0;
+  if (variance == undefined)
+    variance = 1.0;
+  var V1, V2, S;
+  do {
+    var U1 = Math.random();
+    var U2 = Math.random();
+    V1 = 2 * U1 - 1;
+    V2 = 2 * U2 - 1;
+    S = V1 * V1 + V2 * V2;
+  } while (S > 1);
+
+  X = Math.sqrt(-2 * Math.log(S) / S) * V1;
+//  Y = Math.sqrt(-2 * Math.log(S) / S) * V2;
+  X = mean + Math.sqrt(variance) * X;
+//  Y = mean + Math.sqrt(variance) * Y ;
+  return X;
+}
+
 //# Cell class
 // This class represents one cell in the grid.
 function Cell(populationCount, infectedCount, populationLimit) {
@@ -73,11 +107,16 @@ function Cell(populationCount, infectedCount, populationLimit) {
   // Simulates new infections (with given probability).
   this.simInfections = function(prob, incPeriod) {
     if (this.populationCount > 0) {
+      var percentageInfected = this.infectedCount / this.populationCount;
+      var prob_q = prob * percentageInfected;
+
       var susceptible = this.populationCount - this.incubatedCount - this.infectedCount - this.recoveredCount;
       if (susceptible < 0){
         susceptible = 0;
       }
-      var incubated = Math.round(susceptible * prob);
+
+      var infectionProb = randomizeProbWithNormalDistribution(prob_q, 0.5);
+      var incubated = Math.round(susceptible * infectionProb);
       this.incubatedCount += incubated;
       incubatedQueue.push(incubated);
       //Once incubated for x days, become infected
@@ -342,9 +381,9 @@ function Grid() {
       cells[i].simVirusMorbidity(config.virusMorbidity);
       cells[i].simBirths(config.birthRate);
       //percentage of population infected used as a probability
-      var limitContactRate = cells[i].infectedCount / cells[i].populationCount;
-      var contactRate = limitContactRate * config.contactInfectionRate
-      cells[i].simInfections(contactRate, config.incPeriod);
+      //var limitContactRate = cells[i].infectedCount / cells[i].populationCount;
+      //var contactRate = limitContactRate * config.contactInfectionRate
+      cells[i].simInfections(config.contactInfectionRate, config.incPeriod);
     }
 
     this.simReturnImmigrations();
@@ -355,7 +394,7 @@ function Grid() {
   }
 
   this.setAsInfected = function(index) {
-    cells[index].infectedCount = cells[index].populationCount;
+    cells[index].infectedCount = cells[index].populationCount/20;
     this.updateOverallCount();
   }
 
@@ -417,14 +456,14 @@ function Picture(_cols, _rows) {
     for(i = 0; i < cellsCount; i++) {
       if (cells[i].populationLimit > 0) {
         var totalInfected = cells[i].infectedCount + cells[i].incubatedCount;
-        var percentage = totalInfected / cells[i].populationCount;
+        var percentage = totalInfected / cells[i].populationCount*5;
         ctx.fillStyle = "rgba(255,0,0," + percentage + ")";
         ctx.clearRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
                       sizeY, sizeX, sizeY);
         ctx.fillRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
                      sizeY, sizeX, sizeY);
       }else{
-        ctx.fillStyle = "rgba(200,200,200,1)";
+        ctx.fillStyle = "#1F2833";
         ctx.clearRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
                       sizeY, sizeX, sizeY);
         ctx.fillRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
@@ -478,10 +517,10 @@ function Configuration() {
     var values;
     if (id == 1) {
       // influenza
-      values = [0.3, 0.0001, 0.0001, 0.002, 2, 0.5, 5, 0.1];
+      values = [0.055, 0.0001, 0.0001, 0.002, 2, 0.5, 4, 0.055];
     } else if(id == 2) {
       // covid
-      values = [0.3, 0.0001, 0.0001, 0.015, 3, 0.7, 9, 0.1];
+      values = [0.055, 0.0001, 0.0001, 0.015, 3, 0.7, 9, 0.055];
     }
     for(var id in params) {
       var param = params[id];
@@ -528,7 +567,8 @@ function Epidemic(_config, _grid, _picture) {
   var avgComplete = false;
   var repeat = false;
   var repeatCount = 0;
-  //init graph using chart.js
+
+  //init infected graph using chart.js on webpage
   var ctx = document.getElementById("infGraph").getContext('2d');
   var chart = new Chart(ctx, {
     type: 'line',
@@ -541,9 +581,26 @@ function Epidemic(_config, _grid, _picture) {
             data: []
         }]
     },
-    options: {}
+    options: {
+            legend: { labels: {fontColor: "white"}},
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        beginAtZero: true
+                    }
+                }]
+            }
+      }
   });
 
+  //init incubated graph on webpage
   var ctx2 = document.getElementById("incGraph").getContext('2d');
   var chart2 = new Chart(ctx2, {
     type: 'line',
@@ -556,9 +613,26 @@ function Epidemic(_config, _grid, _picture) {
             data: []
         }]
     },
-    options: {}
+    options: {
+            legend: { labels: {fontColor: "white"}},
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        beginAtZero: true
+                    }
+                }]
+            }
+      }
   });
 
+  //init recovered graph on webpage
   var ctx3 = document.getElementById("recGraph").getContext('2d');
   var chart3 = new Chart(ctx3, {
     type: 'line',
@@ -571,12 +645,31 @@ function Epidemic(_config, _grid, _picture) {
             data: []
         }]
     },
-    options: {}
+    options: {
+            legend: { labels: {fontColor: "white"}},
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        beginAtZero: true
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        fontColor: "white",
+                        beginAtZero: true
+                    }
+                }]
+            }
+      }
   });
 
+  //intialise grid on webpage
   this.init = function() {
     picture.updateWithNewData(grid.cells);
   }
+
+  //run simulation
   this.run = function() {
     running = true
     var that = this;
@@ -614,7 +707,7 @@ function Epidemic(_config, _grid, _picture) {
     }
   }
 
-  // Generates next step of the simulation.
+  //Performs next step of the simulation.
   this.nextStep = function() {
     grid.next(config);
     picture.updateWithNewData(grid.cells);
@@ -622,7 +715,7 @@ function Epidemic(_config, _grid, _picture) {
     this.showStats();
   }
 
-  //draw graph
+  //draw infected graph
   this.drawInfGraph = function(labels, data, dataLabel) {
     chart.data.labels = labels;
     chart.data.datasets[0].data = data;
@@ -630,6 +723,7 @@ function Epidemic(_config, _grid, _picture) {
     chart.update();
   }
 
+  //draw incubated graph
   this.drawIncGraph = function(labels, data, dataLabel) {
     chart2.data.labels = labels;
     chart2.data.datasets[0].data = data;
@@ -637,6 +731,7 @@ function Epidemic(_config, _grid, _picture) {
     chart2.update();
   }
 
+  //Draw recovered graph
   this.drawRecGraph = function(labels, data, dataLabel) {
     chart3.data.labels = labels;
     chart3.data.datasets[0].data = data;
@@ -644,6 +739,7 @@ function Epidemic(_config, _grid, _picture) {
     chart3.update();
   }
 
+  //When total infected/incubated reaches 0, stop simulation.
   this.finished = function() {
     grid.resetCells();
     picture.updateWithNewData(grid.cells);
@@ -656,6 +752,7 @@ function Epidemic(_config, _grid, _picture) {
     }
   }
 
+  //Pause simulation
   this.pause = function() {
     running = false;
     clearInterval(this.interval);
@@ -670,9 +767,11 @@ function Epidemic(_config, _grid, _picture) {
   }
 
   this.defaultInfected = function() {
-    grid.setAsInfected(500);//roughly top right
-    grid.setAsInfected(700);//roughly center
-    grid.setAsInfected(800);//roughly bottom left
+    grid.setAsInfected(290);
+    grid.setAsInfected(400);
+    grid.setAsInfected(601);
+    grid.setAsInfected(820);
+    grid.setAsInfected(1169);
   }
 
   //iteratively call this function until 100 runs have been done
@@ -717,6 +816,7 @@ function Epidemic(_config, _grid, _picture) {
     }
   }
 
+  //Restart simulation
   this.restart = function() {
     grid.resetCells();
     iterationNumber = 0;
@@ -724,6 +824,8 @@ function Epidemic(_config, _grid, _picture) {
     this.showStats();
     dayData = [];
     infData = [];
+    recData = [];
+    incData = [];
   }
 
   this.init();
@@ -733,12 +835,10 @@ window.onload = () => {
   var config = new Configuration();
   var grid = new Grid();
   var picture = new Picture(grid.colsCount, grid.rowsCount);
-
   var epidemic = new Epidemic(config, grid, picture);
   epidemic.showStats();
 
-  // # Events.
-  // ## Control buttons' events.
+  // Event listeners
   var startButton = document.getElementById("start");
   var startDefButton = document.getElementById("startDef");
   var pauseButton = document.getElementById("pause");
@@ -759,6 +859,7 @@ window.onload = () => {
   settingButton.addEventListener('click', settingPress);
   run100.addEventListener('click', run100Press);
 
+  //Event listener functions
   function startPress(e){
     e.preventDefault();
     epidemic.run();

@@ -18,6 +18,8 @@ p {
 }
 
 html, body {
+  color: white;
+  background-color: #1F2833;
   height: 100%;
   width: 100%;
   font-family: sans-serif;
@@ -25,10 +27,19 @@ html, body {
   padding: 0;
 }
 
-h1, h2, h3 {
+h1, h2 {
   margin-top: 0;
   padding-top: 0.15%;
   padding-bottom: 0.15%;
+  padding-left: 0;
+  padding-right: 0;
+  margin-bottom: 0;
+}
+
+h3 {
+  margin-top: 0;
+  padding-top: 0.15%;
+  padding-bottom: 3%;
   padding-left: 0;
   padding-right: 0;
   margin-bottom: 0;
@@ -43,23 +54,6 @@ h1, h2, h3 {
   padding: 0;
 }
 
-.setArea {
-  text-align: left;
-}
-
-.header {
-  width: 100%;
-  position: relative;
-  margin: 0;
-  border: none;
-  padding-left: 0;
-  padding-right: 0;
-  padding-top: 0.1%;
-  padding-bottom: 0.1%;
-  text-align: center;
-  background-color: #0099ff;
-}
-
 *, *:before, *:after {
   box-sizing: border-box;
 }
@@ -71,15 +65,20 @@ h1, h2, h3 {
   grid-template-areas:
     'header header header header'
     'sim sim graph graph2'
-    'buttons buttons config config'
-    'presets presets config config'
+    'buttons buttons config presets'
+    'buttons buttons config presets'
 }
 
 .grid-header {
-  background-color: #0099ff;
+  color: white;
+  background-color: #0B0C10;
   text-align: center;
   grid-area: header;
 }
+
+
+h1 { color: #ffffff; font-family: 'Lato', sans-serif; font-size: 330%; font-weight: 300; line-height: 58px; margin: 0 0 10px; }
+p { color: #adb7bd; font-family: 'Lucida Sans', Arial, sans-serif; font-size: 100%; line-height: 26px; margin: 0 0 10px; }
 
 .grid-simArea {
   padding-top: 2.5%;
@@ -104,11 +103,12 @@ h1, h2, h3 {
 }
 
 .grid-config {
+  padding-left: 10%;
   grid-area: config;
 }
 
 .grid-presets {
-  text-align: center;
+  padding-left: 10%;
   grid-area: presets;
 }
 
@@ -125,5 +125,12 @@ h1, h2, h3 {
 }
 
 .canv {
+  background-color: black;
   border-style: solid;
+  border-color: black;
+}
+
+.countryArea {
+  padding-bottom: 4%;
+  padding-top: 4%;
 }
