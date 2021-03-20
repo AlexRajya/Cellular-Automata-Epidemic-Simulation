@@ -516,11 +516,11 @@ function Configuration() {
   this.loadPredefinedSettings = function(id) {
     var values;
     if (id == 1) {
-      // influenza
-      values = [0.055, 0.0001, 0.0001, 0.002, 2, 0.5, 4, 0.055];
-    } else if(id == 2) {
       // covid
       values = [0.055, 0.0001, 0.0001, 0.015, 3, 0.7, 9, 0.055];
+    } else if(id == 2) {
+      // influenza
+      values = [0.055, 0.0001, 0.0001, 0.002, 2, 0.5, 4, 0.055];
     }
     for(var id in params) {
       var param = params[id];
