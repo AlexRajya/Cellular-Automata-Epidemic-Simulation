@@ -576,7 +576,6 @@ function Epidemic(_config, _grid, _picture) {
         labels: [],
         datasets: [{
             label: 'Infected',
-            backgroundColor: 'rgb(241, 30, 30)',
             borderColor: 'rgb(241, 30, 30)',
             data: []
         }]
@@ -608,7 +607,6 @@ function Epidemic(_config, _grid, _picture) {
         labels: [],
         datasets: [{
             label: 'Incubated',
-            backgroundColor: 'rgb(246, 158, 35)',
             borderColor: 'rgb(246, 158, 35)',
             data: []
         }]
@@ -640,7 +638,6 @@ function Epidemic(_config, _grid, _picture) {
         labels: [],
         datasets: [{
             label: 'Recovered',
-            backgroundColor: 'rgb(0, 153, 255)',
             borderColor: 'rgb(0, 153, 255)',
             data: []
         }]
