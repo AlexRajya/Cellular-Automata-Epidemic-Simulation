@@ -78,7 +78,7 @@ h3 {
 
 
 h1 { color: #ffffff; font-family: 'Lato', sans-serif; font-size: 330%; font-weight: 300; line-height: 58px; margin: 0 0 10px; }
-p { color: #adb7bd; font-family: 'Lucida Sans', Arial, sans-serif; font-size: 100%; line-height: 26px; margin: 0 0 10px; }
+p { color: #ffffff; font-family: 'Lato', sans-serif;font-size: 100%; line-height: 26px; margin: 0 0 5px; }
 
 .grid-simArea {
   padding-top: 2.5%;
@@ -113,8 +113,8 @@ p { color: #adb7bd; font-family: 'Lucida Sans', Arial, sans-serif; font-size: 10
 }
 
 .grid-stats {
+  padding-top: 5%;
   padding-left: 10%;
-  padding-top: 7.5%;
   grid-area: stats;
 }
 

@@ -684,11 +684,11 @@ function Epidemic(_config, _grid, _picture) {
     var incArea = document.getElementById("incubated")
     var infArea = document.getElementById("infected");
     var recArea = document.getElementById("recovered");
-    dayArea.innerHTML = ("Day: " + iterationNumber);
-    popArea.innerHTML = ("Population: " + pop + "M");
-    incArea.innerHTML = ("Incubated population: " + inc + "M");
-    infArea.innerHTML = ("Infected population: " + inf + "M");
-    recArea.innerHTML = ("Recovered population: " + rec + "M");
+    dayArea.innerHTML = ("<p><b>Day:</b> " + iterationNumber + "</p>");
+    popArea.innerHTML = ("<p><b>Population:</b> " + pop + "M" + "</p>");
+    incArea.innerHTML = ("<p><b>Incubated:</b> " + inc + "M" + "</p>");
+    infArea.innerHTML = ("<p><b>Infected:</b> " + inf + "M" + "</p>");
+    recArea.innerHTML = ("<p><b>Recovered:</b> " + rec + "M" + "</p>");
     //Append data to graph dataset
     dayData.push(iterationNumber);
     infData.push(inf);
@@ -843,7 +843,7 @@ window.onload = () => {
   var restartButton = document.getElementById("restart");
   var picture = document.getElementById("picture");
   var selectedVirus = document.getElementById("defaultEpidemics");
-  var settingButton = document.getElementById("settingButton");
+  var settingButton = document.getElementById("configuration");
   var run100 = document.getElementById("run100");
 
   startButton.addEventListener('click', startPress);
@@ -853,7 +853,7 @@ window.onload = () => {
   restartButton.addEventListener('click', restartPress);
   picture.addEventListener('click', picturePress);
   selectedVirus.addEventListener('change', virusPress);
-  settingButton.addEventListener('click', settingPress);
+  settingButton.addEventListener('change', settingPress);
   run100.addEventListener('click', run100Press);
 
   //Event listener functions

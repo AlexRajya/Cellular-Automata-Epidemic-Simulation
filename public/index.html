@@ -23,7 +23,6 @@
       <div class="grid-simArea">
         <div class="imgArea" >
           <canvas id="picture" width="475" height="475" class="canv" style="background-image: url('img/poland.gif');">
-
           </canvas>
         </div>
       </div>
@@ -34,17 +33,13 @@
       <div class="grid-graph2">
         <canvas id="recGraph"></canvas>
         <div id="iterationInfo" class="grid-stats">
-          <b>
-            <div id="day"></div>
-            <p></p>
-            <div id="pop"></div>
-            <p></p>
-            <div id="incubated"></div>
-            <p></p>
-            <div id="infected"></div>
-            <p></p>
-            <div id="recovered"></div>
-          </b>
+            <p>
+              <div id="day"></div>
+              <div id="pop"></div>
+              <div id="incubated"></div>
+              <div id="infected"></div>
+              <div id="recovered"></div>
+            </p>
         </div>
       </div>
       <div class="grid-buttons">
@@ -61,72 +56,87 @@
         <h3> Presets: </h3>
         <div id="defaultEpidemics">
           <form>
-            <label class="radio">
-              <input type="radio" name="providedEpidemics" value="1" checked>
-              <span>Covid-19</span>
-            </label>
-            <p></p>
-            <label class="radio">
-              <input type="radio" name="providedEpidemics" value="2">
-              <span>Influenza</span>
-            </label>
-            <p></p>
-            <label class="radio">
-              <input type="radio" name="providedEpidemics" value="3">
-              <span>Covid-19 Lockdown</span>
-            </label>
-            <p></p>
-            <label class="radio">
-              <input type="radio" name="providedEpidemics" value="4">
-              <span>Covid-19 Masks</span>
-            </label>
+            <p>
+              <label class="radio">
+                <input type="radio" name="providedEpidemics" value="1" checked>
+                <span>Covid-19</span>
+              </label>
+            </p>
+            <p>
+              <label class="radio">
+                <input type="radio" name="providedEpidemics" value="2">
+                <span>Influenza</span>
+              </label>
+            </p>
+            <p>
+              <label class="radio">
+                <input type="radio" name="providedEpidemics" value="3">
+                <span>Covid-19 Lockdown</span>
+              </label>
+            </p>
+            <p>
+              <label class="radio">
+                <input type="radio" name="providedEpidemics" value="4">
+                <span>Covid-19 Masks</span>
+              </label>
+            </p>
           </form>
         </div>
         <div class="countryArea">
           <h3>Country Select: </h3>
           <div id="countries">
             <form>
-              <label class="radio">
-                <input type="radio" name="providedEpidemics" value="1" checked>
-                <span>Poland</span>
-              </label>
-              <p></p>
-              <label class="radio">
-                <input type="radio" name="providedEpidemics" value="2">
-                <span>UK</span>
-              </label>
+              <p>
+                <label class="radio">
+                  <input type="radio" name="providedEpidemics" value="1" checked>
+                  <span>Poland</span>
+                </label>
+              </p>
+              <p>
+                <label class="radio">
+                  <input type="radio" name="providedEpidemics" value="2">
+                  <span>UK</span>
+                </label>
+              </p>
             </form>
           </div>
         </div>
-        <button id="settingButton">Update Simulation with new settings/Presets</button>
       </div>
       <div class="grid-config">
           <h3> Custom configuration: </h3>
           <form id="configuration" method="post">
+            <p>
               <label>Immigration rate</label>
               <input required="required" type="number" id="immigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
+            </p>
+            <p>
               <label>Birth rate</label>
               <input required="required" type="number" id="birthRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
+            </p>
+            <p>
               <label>Natural death rate</label>
               <input required="required" type="number" id="naturalDeathRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
+            </p>
+            <p>
               <label>Virus morbidity</label>
               <input required="required" type="number" id="virusMorbidity" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
+            </p>
+            <p>
               <label>Incubation Period</label>
               <input required="required" type="number" id="incPeriod" step="0.0001" placeholder="Value over 0">
-              <p></p>
+            </p>
+            <p>
               <label>Contact infection rate</label>
               <input required="required" type="number" id="contactInfectionRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
+            </p>
+            <p>
               <label>Infectious Period</label>
               <input required="required" type="number" id="infPeriod" step="0.0001" placeholder="Value over 0">
-              <p></p>
+            </p>
+            <p>
               <label>Ill Immigration rate</label>
               <input required="required" type="number" id="illImmigrationRate" min="0" max="1" step="0.0001" placeholder="Value between 0 and 1">
-              <p></p>
+            </p>
           </form>
       </div>
     </div>
