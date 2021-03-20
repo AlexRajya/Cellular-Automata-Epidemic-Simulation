@@ -463,7 +463,7 @@ function Picture(_cols, _rows) {
         ctx.fillRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
                      sizeY, sizeX, sizeY);
       }else{
-        ctx.fillStyle = "#1F2833";
+        ctx.fillStyle = "rgba(0,0,0,0)";
         ctx.clearRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *
                       sizeY, sizeX, sizeY);
         ctx.fillRect((i % rowsCount) * sizeX, Math.floor(i / rowsCount) *

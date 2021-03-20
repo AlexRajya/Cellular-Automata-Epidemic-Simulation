@@ -125,8 +125,9 @@ p { color: #adb7bd; font-family: 'Lucida Sans', Arial, sans-serif; font-size: 10
 }
 
 .canv {
-  background-color: black;
+  background-color: rgba(0,0,0,0);
   border-style: solid;
+  border-width: thick;
   border-color: black;
 }
 
