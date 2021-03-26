@@ -46,8 +46,8 @@ function get2D(cells) {
   return twoD;
 }
 
-//# Cell class
-// This class represents one cell in the grid.
+//Cell class
+//This class represents one cell in the grid.
 class Cell {
   constructor(population, populationLimit) {
     this.populationLimit = populationLimit;
@@ -178,8 +178,8 @@ class Cell {
   }
 }
 
-// # Grid class
-// It represents grid of cells.
+//Grid class
+//It represents grid of cells.
 class Grid {
   constructor() {
     this.rows = 36;
@@ -399,8 +399,8 @@ class Grid {
   }
 }
 
-// # Picture class
-// Shows map of Poland, gather mouse clicks.
+//Picture class
+//Shows map of Poland, gather mouse clicks.
 class Picture {
   constructor(cols, rows) {
     this.colsCount = cols;
@@ -459,7 +459,7 @@ class Picture {
   }
 }
 
-// # Configuration class
+//Configuration class
 class Configuration {
   constructor(){
     this.loadPredefinedSettings(1);
@@ -508,7 +508,7 @@ class Configuration {
   }
 }
 
-// # Epidemic class
+//Epidemic class
 class Epidemic {
   constructor(config, grid, picture){
     this.config = config;
@@ -770,6 +770,7 @@ class Epidemic {
   }
 }
 
+//init event handlers / classes
 window.onload = () => {
   var config = new Configuration();
   var grid = new Grid();
