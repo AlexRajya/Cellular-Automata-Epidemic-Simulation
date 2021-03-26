@@ -432,7 +432,7 @@ class Picture {
       if (cells[i].populationLimit > 0) {
         var totalInfected = cells[i].infectedCount + cells[i].incubatedCount;
         var percentage = totalInfected / cells[i].populationCount;
-        this.ctx.fillStyle = "rgba(255,0,0," + (percentage) + ")";
+        this.ctx.fillStyle = "rgba(255,0,0," + (percentage * 1.3) + ")";
         this.ctx.clearRect((i % this.rowsCount) * this.sizeX, Math.floor(i / this.rowsCount) *
                       this.sizeY, this.sizeX, this.sizeY);
         this.ctx.fillRect((i % this.rowsCount) * this.sizeX, Math.floor(i / this.rowsCount) *
@@ -460,300 +460,272 @@ class Picture {
 }
 
 // # Configuration class
-function Configuration() {
-  var params = ["immigrationRate", "birthRate", "naturalDeathRate",
+class Configuration {
+  constructor(){
+    this.loadPredefinedSettings(1);
+    this.params = ["immigrationRate", "birthRate", "naturalDeathRate",
     "virusMorbidity", "incPeriod", "contactInfectionRate",
     "infPeriod", "illImmigrationRate"];
-
-  // Generate getters and setters
-  for(id in params) {
-    var param = params[id];
-    this[param] = function() {
-      return this[param];
-    };
-    // Create a setter that checks whether 'val' is in the interval [0,1]
-    this[param] = function(val) {
-      if (val > 1) {
-        val = 1;
-      } else if (val < 0) {
-        val = 0;
-      }
-      this[param] = val;
-    };
   }
 
-  //[1"immigrationRate", 2"birthRate", 3"naturalDeathRate",
-  //  4"virusMorbidity", 5"incubationPeriod", 6"contactInfectionRate",
-  //  7"infectiousPeriod", 8"illimmigrationRate"];
-  // Loads predefined settings for few diseases.
-  this.loadPredefinedSettings = function(id) {
-    var values;
+  get immigrationRate(){return this.immigrationRate_;}
+  get birthRate(){return this.birthRate_;}
+  get naturalDeathRate(){return this.naturalDeathRate_;}
+  get virusMorbidity(){return this.virusMorbidity_;}
+  get incPeriod(){return this.incPeriod_;}
+  get contactInfectionRate(){return this.contactInfectionRate_;}
+  get infPeriod(){return this.infPeriod_;}
+  get illImmigrationRate(){return this.illImmigrationRate_;}
+
+  loadPredefinedSettings(id){
     if (id == 1) {
-      // covid
-      values = [0.055, 0.0001, 0.0001, 0.015, 3, 0.45, 9, 0.015];
-    } else if(id == 2) {
-      // influenza
-      values = [0.055, 0.0001, 0.0001, 0.000043, 2, 0.45, 4, 0.015];
-    }
-    for(var id in params) {
-      var param = params[id];
-      this[param] = values[id];
-    }
-    this.pushSettingsToForm();
-  }
-
-  // Loads settings entered by the user in the form.
-  this.loadSettingsFromForm = function() {
-    for (var id in params) {
-      var param = params[id];
-      var paramVal = document.getElementById(param).value;
-      this[param] = parseFloat(paramVal);
+      this.immigrationRate_ = 0.055;
+      this.birthRate_ = 0.0001;
+      this.naturalDeathRate_ = 0.0001;
+      this.virusMorbidity_ = 0.015;
+      this.incPeriod_ = 3;
+      this.contactInfectionRate_ = 0.45;
+      this.infPeriod_ = 9;
+      this.illImmigrationRate_ = 0.015;
+    }else if (id == 2) {
+      this.immigrationRate_ = 0.055;
+      this.birthRate_ = 0.0001;
+      this.naturalDeathRate_ = 0.0001;
+      this.virusMorbidity_ = 0.000043;
+      this.incPeriod_ = 2;
+      this.contactInfectionRate_ = 0.45;
+      this.infPeriod_ = 4;
+      this.illImmigrationRate_ = 0.015;
     }
   }
 
-  // Updates user-facing form with new values. It's used e.g. after loading one
-  // of the default diseases.
-  this.pushSettingsToForm = function() {
-    for (var id in params) {
-      var param = params[id];
-      document.getElementById(param).value = (this[param]);
-    }
+  loadSettingsFromForm() {
+    //TODO
   }
 
-  // constructor
-  this.loadPredefinedSettings(1);
-};
+  pushSettingsToForm() {
+    //TODO
+  }
+}
 
 // # Epidemic class
-function Epidemic(_config, _grid, _picture) {
-  var config = _config;
-  var grid = _grid;
-  var picture = _picture;
-  var iterationNumber = 0;
-  var running = false;
-  var infData = [];
-  var incData = [];
-  var recData = [];
-  var dayData = [];
-  var inf100 = [];
-  var day100 = [];
-  var avgComplete = false;
-  var repeat = false;
-  var repeatCount = 0;
+class Epidemic {
+  constructor(config, grid, picture){
+    this.config = config;
+    this.grid = grid;
+    this.picture = picture;
+    this.iterationNumber = 0;
+    this.running = false;
+    this.infData = [];
+    this.incData = [];
+    this.recData = [];
+    this.dayData = [];
+    this.inf100 = [];
+    this.day100 = [];
+    this.avgComplete = false;
+    this.repeat = false;
+    this.repeatCount = 0;
 
-  //init infected graph using chart.js on webpage
-  var ctx = document.getElementById("infGraph").getContext('2d');
-  var chart = new Chart(ctx, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Infected',
-            borderColor: 'rgb(241, 30, 30)',
-            data: []
-        }]
-    },
-    options: {
-            legend: { labels: {fontColor: "white"}},
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        fontColor: "white",
-                        beginAtZero: true
-                    }
-                }],
-                xAxes: [{
-                    ticks: {
-                        fontColor: "white",
-                        beginAtZero: true
-                    }
-                }]
-            }
-      }
-  });
+    picture.updateWithNewData(this.grid.cells);
 
-  //init incubated graph on webpage
-  var ctx2 = document.getElementById("incGraph").getContext('2d');
-  var chart2 = new Chart(ctx2, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Incubated',
-            borderColor: 'rgb(246, 158, 35)',
-            data: []
-        }]
-    },
-    options: {
-            legend: { labels: {fontColor: "white"}},
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        fontColor: "white",
-                        beginAtZero: true
-                    }
-                }],
-                xAxes: [{
-                    ticks: {
-                        fontColor: "white",
-                        beginAtZero: true
-                    }
-                }]
-            }
-      }
-  });
+    //init infected graph using chart.js on webpage
+    this.ctx = document.getElementById("infGraph").getContext('2d');
+    this.chart = new Chart(this.ctx, {
+      type: 'line',
+      data: {
+          labels: [],
+          datasets: [{
+              label: 'Infected',
+              borderColor: 'rgb(241, 30, 30)',
+              data: []
+          }]
+      },
+      options: {
+              legend: { labels: {fontColor: "white"}},
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          fontColor: "white",
+                          beginAtZero: true
+                      }
+                  }],
+                  xAxes: [{
+                      ticks: {
+                          fontColor: "white",
+                          beginAtZero: true
+                      }
+                  }]
+              }
+        }
+    });
 
-  //init recovered graph on webpage
-  var ctx3 = document.getElementById("recGraph").getContext('2d');
-  var chart3 = new Chart(ctx3, {
-    type: 'line',
-    data: {
-        labels: [],
-        datasets: [{
-            label: 'Recovered',
-            borderColor: 'rgb(0, 153, 255)',
-            data: []
-        }]
-    },
-    options: {
-            legend: { labels: {fontColor: "white"}},
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        fontColor: "white",
-                        beginAtZero: true
-                    }
-                }],
-                xAxes: [{
-                    ticks: {
-                        fontColor: "white",
-                        beginAtZero: true
-                    }
-                }]
-            }
-      }
-  });
+    //init incubated graph on webpage
+    this.ctx2 = document.getElementById("incGraph").getContext('2d');
+    this.chart2 = new Chart(this.ctx2, {
+      type: 'line',
+      data: {
+          labels: [],
+          datasets: [{
+              label: 'Incubated',
+              borderColor: 'rgb(246, 158, 35)',
+              data: []
+          }]
+      },
+      options: {
+              legend: { labels: {fontColor: "white"}},
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          fontColor: "white",
+                          beginAtZero: true
+                      }
+                  }],
+                  xAxes: [{
+                      ticks: {
+                          fontColor: "white",
+                          beginAtZero: true
+                      }
+                  }]
+              }
+        }
+    });
 
-  //intialise grid on webpage
-  this.init = function() {
-    picture.updateWithNewData(grid.cells);
+    //init recovered graph on webpage
+    this.ctx3 = document.getElementById("recGraph").getContext('2d');
+    this.chart3 = new Chart(this.ctx3, {
+      type: 'line',
+      data: {
+          labels: [],
+          datasets: [{
+              label: 'Recovered',
+              borderColor: 'rgb(0, 153, 255)',
+              data: []
+          }]
+      },
+      options: {
+              legend: { labels: {fontColor: "white"}},
+              scales: {
+                  yAxes: [{
+                      ticks: {
+                          fontColor: "white",
+                          beginAtZero: true
+                      }
+                  }],
+                  xAxes: [{
+                      ticks: {
+                          fontColor: "white",
+                          beginAtZero: true
+                      }
+                  }]
+              }
+        }
+    });
   }
 
-  //run simulation
-  this.run = function() {
-    running = true
+  run() {
+    this.running = true;
     var that = this;
-    this.interval = setInterval(function() { that.nextStep()}, 60 );
+    this.interval = setInterval(function() { that.nextStep()}, 75 );
   }
 
-  // Show current stats (day, population, infected) under the map.
-  this.showStats = function() {
-    var pop = Math.round(grid.populationOverallCount/10000)/100;
-    var inc = Math.round(grid.incubatedOverallCount/10000)/100;
-    var inf = Math.round(grid.infectedOverallCount/10000)/100;
-    var rec = Math.round(grid.recoveredOverallCount/10000)/100;
+  showStats() {
+    var pop = Math.round((this.grid.populationOverallCount)/10000)/100;
+    var inc = Math.round(this.grid.incubatedOverallCount/10000)/100;
+    var inf = Math.round(this.grid.infectedOverallCount/10000)/100;
+    var rec = Math.round(this.grid.recoveredOverallCount/10000)/100;
     var dayArea = document.getElementById("day");
     var popArea = document.getElementById("pop");
     var incArea = document.getElementById("incubated")
     var infArea = document.getElementById("infected");
     var recArea = document.getElementById("recovered");
-    dayArea.innerHTML = ("<p><b>Day:</b> " + iterationNumber + "</p>");
+    dayArea.innerHTML = ("<p><b>Day:</b> " + this.iterationNumber + "</p>");
     popArea.innerHTML = ("<p><b>Population:</b> " + pop + "M" + "</p>");
     incArea.innerHTML = ("<p><b>Incubated:</b> " + inc + "M" + "</p>");
     infArea.innerHTML = ("<p><b>Infected:</b> " + inf + "M" + "</p>");
     recArea.innerHTML = ("<p><b>Recovered:</b> " + rec + "M" + "</p>");
     //Append data to graph dataset
-    dayData.push(iterationNumber);
-    infData.push(inf);
-    incData.push(inc);
-    recData.push(rec);
+    this.dayData.push(this.iterationNumber);
+    this.infData.push(inf);
+    this.incData.push(inc);
+    this.recData.push(rec);
     //Draw graphs
-    this.drawInfGraph(dayData, infData, "Infected");
-    this.drawIncGraph(dayData, incData, "Incubated");
-    this.drawRecGraph(dayData, recData, "Recovered");
+    this.drawInfGraph(this.dayData, this.infData, "Infected");
+    this.drawIncGraph(this.dayData, this.incData, "Incubated");
+    this.drawRecGraph(this.dayData, this.recData, "Recovered");
     //check if simulation is finished
-    if ((iterationNumber > 1) && ((inf+inc) == 0)){
+    if ((this.iterationNumber > 1) && ((inf+inc) == 0)){
       this.finished();
     }
   }
 
-  //Performs next step of the simulation.
-  this.nextStep = function() {
-    grid.next(config);
-    picture.updateWithNewData(grid.cells);
-    iterationNumber++;
+  nextStep() {
+    this.grid.next(this.config);
+    this.picture.updateWithNewData(this.grid.cells);
+    this.iterationNumber++;
     this.showStats();
   }
 
-  //draw infected graph
-  this.drawInfGraph = function(labels, data, dataLabel) {
-    chart.data.labels = labels;
-    chart.data.datasets[0].data = data;
-    chart.data.datasets[0].label = dataLabel;
-    chart.update();
+  drawInfGraph(labels, data, dataLabel) {
+    this.chart.data.labels = labels;
+    this.chart.data.datasets[0].data = data;
+    this.chart.data.datasets[0].label = dataLabel;
+    this.chart.update();
   }
 
-  //draw incubated graph
-  this.drawIncGraph = function(labels, data, dataLabel) {
-    chart2.data.labels = labels;
-    chart2.data.datasets[0].data = data;
-    chart2.data.datasets[0].label = dataLabel;
-    chart2.update();
+  drawIncGraph(labels, data, dataLabel) {
+    this.chart2.data.labels = labels;
+    this.chart2.data.datasets[0].data = data;
+    this.chart2.data.datasets[0].label = dataLabel;
+    this.chart2.update();
   }
 
-  //Draw recovered graph
-  this.drawRecGraph = function(labels, data, dataLabel) {
-    chart3.data.labels = labels;
-    chart3.data.datasets[0].data = data;
-    chart3.data.datasets[0].label = dataLabel;
-    chart3.update();
+  drawRecGraph(labels, data, dataLabel) {
+    this.chart3.data.labels = labels;
+    this.chart3.data.datasets[0].data = data;
+    this.chart3.data.datasets[0].label = dataLabel;
+    this.chart3.update();
   }
 
-  //When total infected/incubated reaches 0, stop simulation.
-  this.finished = function() {
-    grid.resetCells();
-    picture.updateWithNewData(grid.cells);
+  finished() {
+    this.grid.resetCells();
+    this.picture.updateWithNewData(this.grid.cells);
     this.pause();
     //check if user is running repeating simulations
-    if (repeat == true){
-      inf100.push(infData);
-      day100.push(dayData);
+    if (this.repeat == true){
+      this.inf100.push(this.infData);
+      this.day100.push(this.dayData);
       this.run100();
     }
   }
 
-  //Pause simulation
-  this.pause = function() {
-    running = false;
+  pause() {
+    this.running = false;
     clearInterval(this.interval);
   }
 
-  // This method is called when user clicks on the map.
-  this.infectedUpdated = function(event) {
-    var pos = picture.getClickedCellPosition(event);
-    grid.setAsInfected(pos.index);
-    picture.setAsInfected(pos.index, pos.row, pos.col);
+  infectedUpdated(event) {
+    var pos = this.picture.getClickedCellPosition(event);
+    this.grid.setAsInfected(pos.index);
+    this.picture.setAsInfected(pos.index, pos.row, pos.col);
     this.showStats();
   }
 
-  this.defaultInfected = function() {
-    grid.setAsInfected(290);
-    grid.setAsInfected(400);
-    grid.setAsInfected(601);
-    grid.setAsInfected(820);
-    grid.setAsInfected(1169);
+  defaultInfected() {
+    this.grid.setAsInfected(290);
+    this.grid.setAsInfected(400);
+    this.grid.setAsInfected(601);
+    this.grid.setAsInfected(820);
+    this.grid.setAsInfected(1169);
   }
 
-  //iteratively call this function until 100 runs have been done
-  //then draw results of the averages from the 100 runs
-  this.run100 = function() {
-    if (repeatCount == 100){
+  run100() {
+    if (this.repeatCount == 100){
       //identify max length of days out of all simulations
       var longest = 0;
       var longestIndex;
-      for (var i = 0; i < day100.length; i++){
+      for (var i = 0; i < this.day100.length; i++){
         if (day100[i].length > longest){
-          longest = day100[i].length;
+          longest = this.day100[i].length;
           longestIndex = i;
         }
       }
@@ -762,43 +734,40 @@ function Epidemic(_config, _grid, _picture) {
       var dayAverage;
       for (var i = 0; i < longest; i++){
         dayAverage = 0;
-        for (var j = 0; j < inf100.length; j++){
-          if ((inf100[j][i]) != undefined){
-            dayAverage += inf100[j][i];
+        for (var j = 0; j < this.inf100.length; j++){
+          if ((this.inf100[j][i]) != undefined){
+            dayAverage += this.inf100[j][i];
           }
         }
         //round to 2 decimal places and append
-        avgInf.push(Math.round(dayAverage/(inf100.length) * 100)/100);
+        this.avgInf.push(Math.round(dayAverage/(this.inf100.length) * 100)/100);
       }
       //update graph with averages
-      this.drawInfGraph(day100[longestIndex], avgInf, "Avg-Infected");
+      this.drawInfGraph(this.day100[longestIndex], this.avgInf, "Avg-Infected");
       //Reset vars
-      repeat = false;
-      repeatCount = 0;
-      day100 = [];
-      inf100 = [];
+      this.repeat = false;
+      this.repeatCount = 0;
+      this.day100 = [];
+      this.inf100 = [];
     }else{
-      repeat = true;
-      repeatCount++;
+      this.repeat = true;
+      this.repeatCount++;
       this.restart();
       this.defaultInfected();
       this.run();
     }
   }
 
-  //Restart simulation
-  this.restart = function() {
-    grid.resetCells();
-    iterationNumber = 0;
-    this.init();
+  restart() {
+    this.grid.resetCells();
+    this.iterationNumber = 0;
+    this.picture.updateWithNewData(this.grid.cells);
     this.showStats();
-    dayData = [];
-    infData = [];
-    recData = [];
-    incData = [];
+    this.dayData = [];
+    this.infData = [];
+    this.recData = [];
+    this.incData = [];
   }
-
-  this.init();
 }
 
 window.onload = () => {
