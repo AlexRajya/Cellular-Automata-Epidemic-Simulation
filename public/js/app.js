@@ -374,7 +374,7 @@ class Grid {
   }
 
   setAsInfected(index) {
-    this.cells[index].addInfected(1000);
+    this.cells[index].addInfected(this.cells[index].populationCount / 5);
     this.updateOverallCount();
   }
 
