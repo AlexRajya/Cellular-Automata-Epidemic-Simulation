@@ -26,9 +26,7 @@ function normal_random(mean, variance) {
   } while (S > 1);
 
   X = Math.sqrt(-2 * Math.log(S) / S) * V1;
-//  Y = Math.sqrt(-2 * Math.log(S) / S) * V2;
   X = mean + Math.sqrt(variance) * X;
-//  Y = mean + Math.sqrt(variance) * Y ;
   return X;
 }
 
