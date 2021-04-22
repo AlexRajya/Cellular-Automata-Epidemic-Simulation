@@ -50,14 +50,14 @@ class Cell {
   constructor(population, populationLimit) {
     this.populationLimit = populationLimit;
     this.susceptible = population;
-    this.incubated = [];
-    this.infected = [];
+    this.incubated = [];//This array represents a queue
+    this.infected = [];//This array represents a queue
     this.recovered = 0;
     this.susAway = 0;
     this.infAway = 0;
   }
 
-  get populationCount() {
+  get populationCount() { //Return overall population count
     return Math.round(this.incubatedCount + this.infectedCount +
       this.recovered + this.susceptible - this.susAway - this.infAway);
   }
@@ -68,7 +68,7 @@ class Cell {
   get recoveredCount() {return Math.round(this.recovered);}
 
   addInfected(val) {
-    this.infected.push(val);
+    this.infected.push(val);//Add to infected queue
   }
 
   getImmigrants(immigrationRate, illImmigrationRate) {
@@ -81,7 +81,7 @@ class Cell {
     return [toMoveInf, toMoveSus];
   }
 
-  returnImmigrants(newInf){
+  returnImmigrants(newInf){ //Simulate immigrants returning to origin cell
     //add newly infected to incubated queue
     if (this.incubated.length > 0){
       this.incubated[(this.incubated.length - 1)] += newInf;
@@ -93,7 +93,7 @@ class Cell {
     this.infAway = 0;
   }
 
-  simNaturalDeaths(prob) {
+  simNaturalDeaths(prob) { //Simulate natural deaths
     this.susceptible -=  Math.round(this.susceptible * prob);
     //Apply natural death prob to all in queue
     for (var i = 0; i < this.incubated.length; i++) {
@@ -106,7 +106,7 @@ class Cell {
     this.recovered -= Math.round(this.recovered * prob);
   }
 
-  simVirusMorbidity(prob) {
+  simVirusMorbidity(prob) { //Simulate deaths caused by virus
     for (var i = 0; i < this.incubated.length; i++) {
       this.incubated[i] -=  Math.round(this.incubated[i] * prob);
     }
@@ -115,7 +115,7 @@ class Cell {
     }
   }
 
-  simBirths(prob) {
+  simBirths(prob) { //Simulate natural births
     var newBorns = Math.round(this.populationCount * prob);
     if(this.populationCount + newBorns > this.populationLimit) {
       newBorns = 0;
@@ -123,7 +123,8 @@ class Cell {
     this.susceptible += newBorns;
   }
 
-  simInfections(prob, incPeriod, index, immigrants){
+  simInfections(prob, incPeriod, index, immigrants){ //Sim new infections
+    //Get counts from immigrants
     var immigrantsInf = 0;
     var immigrantsSus = 0;
     for (var i = 0; i < immigrants.length; i++){
@@ -134,7 +135,7 @@ class Cell {
     }
 
     if (this.populationCount > 0){
-      //Calc infection prob
+      //Calc infection prob using total inf + immigrants
       var percentageInfected = ((this.infectedCount + immigrantsInf) - this.infAway)
                               / ((this.populationCount + immigrantsSus) - this.susAway);
       var prob_q = 1 - Math.exp(-prob * percentageInfected);
@@ -147,7 +148,7 @@ class Cell {
       if (this.susceptible < 0){
         this.susceptible = 0;
       }
-      //check if incubated turns into infectious
+      //check if any incubated turns into infectious based on length of queue
       if (this.incubated.length >= incPeriod){
         var newInfected = this.incubated[0];
         this.infected.push(newInfected);
@@ -167,7 +168,7 @@ class Cell {
     return immigrants;
   }
 
-  simRecoveries(infLength) {
+  simRecoveries(infLength) { //Simulate recovering from virus
     if (this.infected.length == infLength){
       var newRecovered = this.infected[0];
       this.infected.shift();
@@ -191,7 +192,7 @@ class Grid {
     this.recoveredCount = 0;
     this.nearestCities = [];
     this.immigrants = [];
-    // Assign pop to each cell
+    // Assign population to each cell
     for(var i = 0; i < this.cellsCount; i++) {
       this.cells[i] = new Cell(cellsPopulation[i], cellsPopulation[i] * 2.5);
     }
@@ -211,7 +212,7 @@ class Grid {
   get recoveredOverallCount(){return this.recoveredCount;}
   get susceptibleOverallCount(){return this.susceptibleCount;}
 
-  updateOverallCount(){
+  updateOverallCount(){//Get total count from all cells
     //reset counts
     this.populationCount = 0;
     this.incubatedCount = 0;
@@ -225,7 +226,7 @@ class Grid {
     }
   }
 
-  getNeighbours(index){
+  getNeighbours(index){//Find neighbours of cell at index
     var neighbours = [];
     var possibleUp, possibleDown, possibleLeft, possibleRight;
     if (index / this.colsCount >= 1) {
@@ -244,7 +245,7 @@ class Grid {
       neighbours.push(index - 1); //left
       possibleLeft = true;
     }
-    // Moore neighbourhood
+    // Moore neighbourhood (diagonals)
     if (possibleUp && possibleRight) {
       neighbours.push(index - this.colsCount + 1);
     }
@@ -257,11 +258,10 @@ class Grid {
     if (possibleDown && possibleLeft) {
       neighbours.push(index + this.colsCount - 1);
     }
-
     return neighbours;
   }
 
-  findClosestBigCity(index){
+  findClosestBigCity(index){//Find closest city of pop > 50000 to cell at index
     if (this.cells[index].populationCount >= 50000){
       //return if cell is itself a big city
       return index
@@ -316,7 +316,7 @@ class Grid {
     }
   }
 
-  simImmigrations(config){
+  simImmigrations(config){ //Sim immigrations to neighbouring cells/Large cities
     for (var i = 0; i < this.cells.length; i++){
       var neighbours = this.getNeighbours(i);
       neighbours.push(this.nearestCities[i])
@@ -344,7 +344,7 @@ class Grid {
     }
   }
 
-  simReturnImmigrations() {
+  simReturnImmigrations() { //Return immigrants to original cells
     var totalNewInf = 0;
     for (var i = 0; i < this.immigrants.length; i++){
       totalNewInf += this.immigrants[i].newInf;
@@ -358,7 +358,7 @@ class Grid {
     this.immigrants = [];
   }
 
-  resetCells() {
+  resetCells() { //Reset grid
     this.cells = new Array(this.cellsCount);
     for(var i = 0; i < this.cellsCount; i++) {
       this.cells[i] = new Cell(cellsPopulation[i], cellsPopulation[i] * 2.5);
@@ -371,24 +371,23 @@ class Grid {
     this.updateOverallCount();
   }
 
-  setAsInfected(index) {
+  setAsInfected(index) { //Add infected to user clicked cell
     this.cells[index].addInfected(this.cells[index].populationCount / 5);
     this.updateOverallCount();
   }
 
-  next(config) {
+  next(config) { //Step the simulation forward (1 day)
     this.simImmigrations(config);
     // Simulates natural deaths, deaths caused by the virus and new births.
     for(var i = 0; i < this.cellsCount; i++) {
       this.cells[i].simNaturalDeaths(config.naturalDeathRate);
       this.cells[i].simVirusMorbidity(config.virusMorbidity);
       this.cells[i].simBirths(config.birthRate);
-      //percentage of population infected used as a probability
-      //var limitContactRate = cells[i].infectedCount / cells[i].populationCount;
-      //var contactRate = limitContactRate * config.contactInfectionRate
+      //update immigrants list with updated infectious/recovered immigrants
       this.immigrants = this.cells[i].simInfections(config.contactInfectionRate, config.incPeriod, i, this.immigrants);
     }
 
+    //return immigrants to original cells
     this.simReturnImmigrations();
     for(var i = 0; i < this.cellsCount; i++) {
       this.cells[i].simRecoveries(config.infPeriod);
@@ -425,7 +424,7 @@ class Picture {
     };
   }
 
-  updateWithNewData(cells) {
+  updateWithNewData(cells) { //Assign colour to each cell based on % infected
     for(var i = 0; i < this.cellsCount; i++) {
       if (cells[i].populationLimit > 0) {
         var totalInfected = cells[i].infectedCount + cells[i].incubatedCount;
@@ -445,11 +444,11 @@ class Picture {
     }
   }
 
-  getClickedCellPosition(event) {
+  getClickedCellPosition(event) { //Find which cell was clicked by user
     return this.getCellPosition(event.pageX, event.pageY);
   }
 
-  setAsInfected(index, col, row) {
+  setAsInfected(index, col, row) { //Set clicked cell as infected (red)
     if (cellsPopulation[index] != 0) {
       this.ctx.fillStyle = "rgba(255,0,0,100)";
       this.ctx.fillRect(row * this.sizeX, col * this.sizeY, this.sizeX, this.sizeY);
@@ -475,7 +474,7 @@ class Configuration {
   get infPeriod(){return this.infPeriod_;}
   get illImmigrationRate(){return this.illImmigrationRate_;}
 
-  loadPredefinedSettings(id){
+  loadPredefinedSettings(id){ //Load preset
     if (id == 1) {
       this.immigrationRate_ = 0.055;
       this.birthRate_ = 0.0001;
@@ -620,13 +619,13 @@ class Epidemic {
     });
   }
 
-  run() {
+  run() { //Set interval to keep incrementing simulation until stopped
     this.running = true;
     var that = this;
     this.interval = setInterval(function() { that.nextStep()}, 75 );
   }
 
-  showStats() {
+  showStats() { //Display total counts on webpage
     var pop = Math.round((this.grid.populationOverallCount)/10000)/100;
     var inc = Math.round(this.grid.incubatedOverallCount/10000)/100;
     var inf = Math.round(this.grid.infectedOverallCount/10000)/100;
@@ -656,35 +655,35 @@ class Epidemic {
     }
   }
 
-  nextStep() {
+  nextStep() { //Increment simulation
     this.grid.next(this.config);
     this.picture.updateWithNewData(this.grid.cells);
     this.iterationNumber++;
     this.showStats();
   }
 
-  drawInfGraph(labels, data, dataLabel) {
+  drawInfGraph(labels, data, dataLabel) { //Update inf graph with new data
     this.chart.data.labels = labels;
     this.chart.data.datasets[0].data = data;
     this.chart.data.datasets[0].label = dataLabel;
     this.chart.update();
   }
 
-  drawIncGraph(labels, data, dataLabel) {
+  drawIncGraph(labels, data, dataLabel) { //Update inc graph with new data
     this.chart2.data.labels = labels;
     this.chart2.data.datasets[0].data = data;
     this.chart2.data.datasets[0].label = dataLabel;
     this.chart2.update();
   }
 
-  drawRecGraph(labels, data, dataLabel) {
+  drawRecGraph(labels, data, dataLabel) { //Update rec graph with new data
     this.chart3.data.labels = labels;
     this.chart3.data.datasets[0].data = data;
     this.chart3.data.datasets[0].label = dataLabel;
     this.chart3.update();
   }
 
-  finished() {
+  finished() { //Stop simulation when total inf+inc = 0
     this.grid.resetCells();
     this.picture.updateWithNewData(this.grid.cells);
     this.pause();
@@ -696,7 +695,7 @@ class Epidemic {
     }
   }
 
-  pause() {
+  pause() { //Pause simulation
     this.running = false;
     clearInterval(this.interval);
   }
@@ -708,7 +707,7 @@ class Epidemic {
     this.showStats();
   }
 
-  defaultInfected() {
+  defaultInfected() { //Preset
     this.grid.setAsInfected(290);
     this.grid.setAsInfected(400);
     this.grid.setAsInfected(601);
@@ -716,7 +715,7 @@ class Epidemic {
     this.grid.setAsInfected(1169);
   }
 
-  run100() {
+  run100() { //Run simulation 100 times then display averages on graph
     if (this.repeatCount == 100){
       //identify max length of days out of all simulations
       var longest = 0;
@@ -756,7 +755,7 @@ class Epidemic {
     }
   }
 
-  restart() {
+  restart() { //Restart simulation
     this.grid.resetCells();
     this.iterationNumber = 0;
     this.picture.updateWithNewData(this.grid.cells);
