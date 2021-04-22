@@ -8,7 +8,7 @@
     "start": "node server.js"
   },
   "author": "Alex Rajya",
-  "license": "ISC",
+  "license": "",
   "dependencies": {
     "express": "^4.17.1",
     "fs": "0.0.1-security",
