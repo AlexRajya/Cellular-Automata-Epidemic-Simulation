@@ -475,7 +475,7 @@ class Configuration {
   get illImmigrationRate(){return this.illImmigrationRate_;}
 
   loadPredefinedSettings(id){ //Load preset
-    if (id == 1) {
+    if (id == 1) { //COVID-19
       this.immigrationRate_ = 0.055;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
@@ -484,13 +484,31 @@ class Configuration {
       this.contactInfectionRate_ = 0.45;
       this.infPeriod_ = 9;
       this.illImmigrationRate_ = 0.015;
-    }else if (id == 2) {
+    }else if (id == 2) { //Influenza
       this.immigrationRate_ = 0.055;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
       this.virusMorbidity_ = 0.000043;
       this.incPeriod_ = 2;
       this.contactInfectionRate_ = 0.45;
+      this.infPeriod_ = 4;
+      this.illImmigrationRate_ = 0.015;
+    }else if (id == 3) { //COVID-19 Lockdown
+      this.immigrationRate_ = 0.01;
+      this.birthRate_ = 0.0001;
+      this.naturalDeathRate_ = 0.0001;
+      this.virusMorbidity_ = 0.000043;
+      this.incPeriod_ = 2;
+      this.contactInfectionRate_ = 0.45;
+      this.infPeriod_ = 4;
+      this.illImmigrationRate_ = 0.0001;
+    }else if (id == 4) { //COVID-19 Masks
+      this.immigrationRate_ = 0.055;
+      this.birthRate_ = 0.0001;
+      this.naturalDeathRate_ = 0.0001;
+      this.virusMorbidity_ = 0.000043;
+      this.incPeriod_ = 2;
+      this.contactInfectionRate_ = 0.3;
       this.infPeriod_ = 4;
       this.illImmigrationRate_ = 0.015;
     }
