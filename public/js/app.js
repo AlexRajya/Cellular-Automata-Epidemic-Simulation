@@ -531,11 +531,13 @@ class Epidemic {
     this.picture = picture;
     this.iterationNumber = 0;
     this.running = false;
-    this.infData = [];
-    this.incData = [];
-    this.recData = [];
-    this.dayData = [];
-    this.inf100 = [];
+    this.infData = []; //Store inf daily data in array
+    this.incData = []; //Store inf daily data in array
+    this.recData = []; //Store inf daily data in array
+    this.dayData = []; //Store day numbers
+    this.inf100 = []; //Store last 100 sim results for averages
+    this.inc100 = []; //Store last 100 sim results for averages
+    this.rec100 = []; //Store last 100 sim results for averages
     this.day100 = [];
     this.avgComplete = false;
     this.repeat = false;
@@ -549,27 +551,13 @@ class Epidemic {
       type: 'line',
       data: {
           labels: [],
-          datasets: [{
-              label: 'Infected',
-              borderColor: 'rgb(241, 30, 30)',
-              data: []
-          }]
+          datasets: [{label:'Infected',borderColor:'rgb(241, 30, 30)',data:[]}]
       },
       options: {
               legend: { labels: {fontColor: "white"}},
               scales: {
-                  yAxes: [{
-                      ticks: {
-                          fontColor: "white",
-                          beginAtZero: true
-                      }
-                  }],
-                  xAxes: [{
-                      ticks: {
-                          fontColor: "white",
-                          beginAtZero: true
-                      }
-                  }]
+                  yAxes: [{ticks: {fontColor: "white",beginAtZero: true}}],
+                  xAxes: [{ticks: {fontColor: "white",beginAtZero: true}}]
               }
         }
     });
@@ -580,27 +568,13 @@ class Epidemic {
       type: 'line',
       data: {
           labels: [],
-          datasets: [{
-              label: 'Incubated',
-              borderColor: 'rgb(246, 158, 35)',
-              data: []
-          }]
+          datasets: [{label:'Incubated',borderColor:'rgb(246, 158, 35)',data:[]}]
       },
       options: {
               legend: { labels: {fontColor: "white"}},
               scales: {
-                  yAxes: [{
-                      ticks: {
-                          fontColor: "white",
-                          beginAtZero: true
-                      }
-                  }],
-                  xAxes: [{
-                      ticks: {
-                          fontColor: "white",
-                          beginAtZero: true
-                      }
-                  }]
+                  yAxes: [{ticks: {fontColor: "white",beginAtZero: true}}],
+                  xAxes: [{ticks: {fontColor: "white",beginAtZero: true}}]
               }
         }
     });
@@ -611,27 +585,13 @@ class Epidemic {
       type: 'line',
       data: {
           labels: [],
-          datasets: [{
-              label: 'Recovered',
-              borderColor: 'rgb(0, 153, 255)',
-              data: []
-          }]
+          datasets: [{label:'Recovered',borderColor:'rgb(0, 153, 255)',data:[]}]
       },
       options: {
               legend: { labels: {fontColor: "white"}},
               scales: {
-                  yAxes: [{
-                      ticks: {
-                          fontColor: "white",
-                          beginAtZero: true
-                      }
-                  }],
-                  xAxes: [{
-                      ticks: {
-                          fontColor: "white",
-                          beginAtZero: true
-                      }
-                  }]
+                  yAxes: [{ticks: {fontColor: "white",beginAtZero: true}}],
+                  xAxes: [{ticks: {fontColor: "white",beginAtZero: true}}]
               }
         }
     });
@@ -708,6 +668,8 @@ class Epidemic {
     //check if user is running repeating simulations
     if (this.repeat == true){
       this.inf100.push(this.infData);
+      this.inc100.push(this.incData);
+      this.rec100.push(this.recData);
       this.day100.push(this.dayData);
       this.run100();
     }
@@ -732,39 +694,58 @@ class Epidemic {
     this.grid.setAsInfected(820);
     this.grid.setAsInfected(1169);
   }
-
+  //add param to set run time
   run100() { //Run simulation 100 times then display averages on graph
     if (this.repeatCount == 100){
       //identify max length of days out of all simulations
       var longest = 0;
       var longestIndex;
       for (var i = 0; i < this.day100.length; i++){
-        if (day100[i].length > longest){
+        if (this.day100[i].length > longest){
           longest = this.day100[i].length;
           longestIndex = i;
         }
       }
       //get average of all days
       var avgInf = [];
-      var dayAverage;
+      var avgInc = [];
+      var avgRec = [];
+      var dayAvgInf;
+      var dayAvgInc;
+      var dayAvgRec;
+
+      //Calc average for each day
       for (var i = 0; i < longest; i++){
-        dayAverage = 0;
+        dayAvgInf = 0;
+        dayAvgInc = 0;
+        dayAvgRec = 0;
         for (var j = 0; j < this.inf100.length; j++){
           if ((this.inf100[j][i]) != undefined){
-            dayAverage += this.inf100[j][i];
+            dayAvgInf += this.inf100[j][i];
+          }
+          if ((this.inc100[j][i]) != undefined){
+            dayAvgInc += this.inc100[j][i];
+          }
+          if ((this.rec100[j][i]) != undefined){
+            dayAvgRec += this.rec100[j][i];
           }
         }
         //round to 2 decimal places and append
-        this.avgInf.push(Math.round(dayAverage/(this.inf100.length) * 100)/100);
+        avgInf.push(Math.round(dayAvgInf/(this.inf100.length) * 100)/100);
+        avgInc.push(Math.round(dayAvgInc/(this.inc100.length) * 100)/100);
+        avgRec.push(Math.round(dayAvgRec/(this.rec100.length) * 100)/100);
       }
       //update graph with averages
-      this.drawInfGraph(this.day100[longestIndex], this.avgInf, "Avg-Infected");
+      this.drawInfGraph(this.day100[longestIndex], avgInf, "Avg-Infected");
+      this.drawIncGraph(this.day100[longestIndex], avgInc, "Avg-Incubated");
+      this.drawRecGraph(this.day100[longestIndex], avgRec, "Avg-Recovered");
       //Reset vars
       this.repeat = false;
       this.repeatCount = 0;
       this.day100 = [];
       this.inf100 = [];
     }else{
+      //run sim again
       this.repeat = true;
       this.repeatCount++;
       this.restart();
