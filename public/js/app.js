@@ -753,7 +753,7 @@ class Epidemic {
       //Give rec previous day's average val if rec for day X doesnt exist
       for (var i = 1; i < avgRec.length; i++){
         if (avgRec[i] < avgRec[i-1]){
-          avgRec[i] += avgRec[i-1];
+          avgRec[i] = avgRec[i-1];
         }
       }
       //update graph with averages
