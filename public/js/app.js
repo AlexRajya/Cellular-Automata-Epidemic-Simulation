@@ -686,7 +686,7 @@ class Epidemic {
       this.inc100.push(this.incData);
       this.rec100.push(this.recData);
       this.day100.push(this.dayData);
-      this.run100();
+      this.run100(this.runAmount);
     }
   }
 
@@ -702,16 +702,16 @@ class Epidemic {
     this.showStats();
   }
 
-  defaultInfected() { //Preset
-    this.grid.setAsInfected(290);
-    this.grid.setAsInfected(400);
-    this.grid.setAsInfected(601);
-    this.grid.setAsInfected(820);
-    this.grid.setAsInfected(1169);
+  randomInfected() { //Infect 10 random cells
+    for (var i = 0; i < 10; i++){
+      var temp = Math.floor(Math.random() * (1295 - 0 + 1) + 0);
+      this.grid.setAsInfected(temp);
+    }
   }
   //add param to set run time
-  run100() { //Run simulation 100 times then display averages on graph
-    if (this.repeatCount == 100){
+  run100(runAmount) { //Run simulation 100 times then display averages on graph
+    this.runAmount = runAmount;
+    if (this.repeatCount == this.runAmount){
       //identify max length of days out of all simulations
       var longest = 0;
       var longestIndex;
@@ -745,6 +745,11 @@ class Epidemic {
             dayAvgRec += this.rec100[j][i];
           }
         }
+        //give previous val if rec for day X doesnt exist
+        if (dayAvgRec < avgRec[(avgRec.length) - 1]){
+          dayAvgRec += avgRec[(avgRec.length) - 1];
+          console.log("beep");
+        }
         //round to 2 decimal places and append
         avgInf.push(Math.round(dayAvgInf/(this.inf100.length) * 100)/100);
         avgInc.push(Math.round(dayAvgInc/(this.inc100.length) * 100)/100);
@@ -764,7 +769,7 @@ class Epidemic {
       this.repeat = true;
       this.repeatCount++;
       this.restart();
-      this.defaultInfected();
+      this.randomInfected();
       this.run();
     }
   }
@@ -799,6 +804,7 @@ window.onload = () => {
   var selectedVirus = document.getElementById("defaultEpidemics");
   var settingButton = document.getElementById("configuration");
   var run100 = document.getElementById("run100");
+  var run10 = document.getElementById("run10");
 
   startButton.addEventListener('click', startPress);
   startDefButton.addEventListener('click', startDefPress);
@@ -809,6 +815,7 @@ window.onload = () => {
   selectedVirus.addEventListener('change', virusPress);
   settingButton.addEventListener('change', settingPress);
   run100.addEventListener('click', run100Press);
+  run10.addEventListener('click', run10Press);
 
   //Event listener functions
   function startPress(e){
@@ -817,7 +824,7 @@ window.onload = () => {
   };
   function startDefPress(e){
     e.preventDefault();
-    epidemic.defaultInfected();
+    epidemic.randomInfected();
     epidemic.run();
   };
   function pausePress(e) {
@@ -848,7 +855,10 @@ window.onload = () => {
     config.loadSettingsFromForm();
     console.log("Custom settings loaded");
   }
-  function run100Press(e){
-    epidemic.run100();
+  function run100Press(){
+    epidemic.run100(100);
+  }
+  function run10Press(){
+    epidemic.run100(10);
   }
 }
