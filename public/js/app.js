@@ -460,6 +460,7 @@ class Picture {
 class Configuration {
   constructor(){
     this.loadPredefinedSettings(1);
+    this.pushSettingsToForm();
     this.params = ["immigrationRate", "birthRate", "naturalDeathRate",
     "virusMorbidity", "incPeriod", "contactInfectionRate",
     "infPeriod", "illImmigrationRate"];
@@ -515,11 +516,25 @@ class Configuration {
   }
 
   loadSettingsFromForm() {
-    //TODO
+    this.immigrationRate_ = document.getElementById('immigrationRate').value;
+    this.birthRate_ = document.getElementById('birthRate').value;
+    this.naturalDeathRate_ = document.getElementById('naturalDeathRate').value;
+    this.virusMorbidity_ = document.getElementById('virusMorbidity').value;
+    this.incPeriod_ = document.getElementById('incPeriod').value;
+    this.contactInfectionRate_ = document.getElementById('contactInfectionRate').value;
+    this.infPeriod_ = document.getElementById('infPeriod').value;
+    this.illImmigrationRate_ = document.getElementById('illImmigrationRate').value;
   }
 
   pushSettingsToForm() {
-    //TODO
+    document.getElementById('immigrationRate').value = this.immigrationRate_;
+    document.getElementById('birthRate').value = this.birthRate_;
+    document.getElementById('naturalDeathRate').value = this.naturalDeathRate_;
+    document.getElementById('virusMorbidity').value = this.virusMorbidity_;
+    document.getElementById('incPeriod').value = this.incPeriod_;
+    document.getElementById('contactInfectionRate').value = this.contactInfectionRate_;
+    document.getElementById('infPeriod').value = this.infPeriod_;
+    document.getElementById('illImmigrationRate').value = this.illImmigrationRate_;
   }
 }
 
@@ -817,6 +832,7 @@ window.onload = () => {
     e.preventDefault();
     var val = document.querySelector('input[name="providedEpidemics"]:checked').value;
     config.loadPredefinedSettings(val);
+    config.pushSettingsToForm();
     epidemic.restart();
     epidemic.pause();
   };
@@ -826,9 +842,11 @@ window.onload = () => {
   function virusPress(e){
     var val = document.querySelector('input[name="providedEpidemics"]:checked').value;
     config.loadPredefinedSettings(val);
+    config.pushSettingsToForm();
   }
   function settingPress(e){
     config.loadSettingsFromForm();
+    console.log("Custom settings loaded");
   }
   function run100Press(e){
     epidemic.run100();
