@@ -703,7 +703,7 @@ class Epidemic {
   }
 
   randomInfected() { //Infect 10 random cells
-    for (var i = 0; i < 10; i++){
+    for (var i = 1; i < 10; i++){
       var temp = Math.floor(Math.random() * (1295 - 0 + 1) + 0);
       this.grid.setAsInfected(temp);
     }
@@ -745,15 +745,16 @@ class Epidemic {
             dayAvgRec += this.rec100[j][i];
           }
         }
-        //give previous val if rec for day X doesnt exist
-        if (dayAvgRec < avgRec[(avgRec.length) - 1]){
-          dayAvgRec += avgRec[(avgRec.length) - 1];
-          console.log("beep");
-        }
         //round to 2 decimal places and append
         avgInf.push(Math.round(dayAvgInf/(this.inf100.length) * 100)/100);
         avgInc.push(Math.round(dayAvgInc/(this.inc100.length) * 100)/100);
         avgRec.push(Math.round(dayAvgRec/(this.rec100.length) * 100)/100);
+      }
+      //Give rec previous day's average val if rec for day X doesnt exist
+      for (var i = 1; i < avgRec.length; i++){
+        if (avgRec[i] < avgRec[i-1]){
+          avgRec[i] += avgRec[i-1];
+        }
       }
       //update graph with averages
       this.drawInfGraph(this.day100[longestIndex], avgInf, "Avg-Infected");
