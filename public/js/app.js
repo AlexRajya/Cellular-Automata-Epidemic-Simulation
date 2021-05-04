@@ -1,35 +1,3 @@
-//Functions to generate randoms
-function randomizeProbWithNormalDistribution(mu, varCoeff) {
-  var stddev = mu*varCoeff;
-  var prob = normal_random(mu, stddev*stddev);
-  if (prob > 1) {
-    prob = 1;
-  }
-  if (prob < 0) {
-    prob = 0;
-  }
-  return prob;
-}
-
-function normal_random(mean, variance) {
-  if (mean == undefined)
-    mean = 0.0;
-  if (variance == undefined)
-    variance = 1.0;
-  var V1, V2, S;
-  do {
-    var U1 = Math.random();
-    var U2 = Math.random();
-    V1 = 2 * U1 - 1;
-    V2 = 2 * U2 - 1;
-    S = V1 * V1 + V2 * V2;
-  } while (S > 1);
-
-  X = Math.sqrt(-2 * Math.log(S) / S) * V1;
-  X = mean + Math.sqrt(variance) * X;
-  return X;
-}
-
 //Convert array of cells into 2D array
 function get2D(cells) {
   var temp = [];
@@ -133,13 +101,14 @@ class Cell {
         immigrantsSus += immigrants[i].susPop;
       }
     }
+    var immigrantsPop = immigrantsInf+immigrantsSus;
 
     if (this.populationCount > 0){
       //Calc infection prob using total inf + immigrants
       var percentageInfected = ((this.infectedCount + immigrantsInf) - this.infAway)
-                              / ((this.populationCount + immigrantsSus) - this.susAway);
-      var prob_q = 1 - Math.exp(-prob * percentageInfected);
-      var infectionProb = randomizeProbWithNormalDistribution(prob_q, 0.5);
+                              / ((this.populationCount + immigrantsPop) - this.susAway - this.infAway);
+
+      var infectionProb = prob * percentageInfected;
 
       //Add newly infected
       var newIncubated = Math.round(this.susceptible * infectionProb);
@@ -372,7 +341,7 @@ class Grid {
   }
 
   setAsInfected(index) { //Add infected to user clicked cell
-    this.cells[index].addInfected(this.cells[index].populationCount / 5);
+    this.cells[index].addInfected(this.cells[index].populationCount / 10);
     this.updateOverallCount();
   }
 
@@ -477,40 +446,40 @@ class Configuration {
 
   loadPredefinedSettings(id){ //Load preset
     if (id == 1) { //COVID-19
-      this.immigrationRate_ = 0.055;
+      this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
-      this.virusMorbidity_ = 0.015;
+      this.virusMorbidity_ = 0.00015;
       this.incPeriod_ = 3;
-      this.contactInfectionRate_ = 0.45;
+      this.contactInfectionRate_ = 0.35;
       this.infPeriod_ = 9;
       this.illImmigrationRate_ = 0.015;
     }else if (id == 2) { //Influenza
-      this.immigrationRate_ = 0.055;
+      this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
       this.virusMorbidity_ = 0.000043;
       this.incPeriod_ = 2;
-      this.contactInfectionRate_ = 0.45;
+      this.contactInfectionRate_ = 0.35;
       this.infPeriod_ = 4;
       this.illImmigrationRate_ = 0.015;
     }else if (id == 3) { //COVID-19 Lockdown
-      this.immigrationRate_ = 0.01;
+      this.immigrationRate_ = 0.05;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
       this.virusMorbidity_ = 0.000043;
-      this.incPeriod_ = 2;
-      this.contactInfectionRate_ = 0.45;
-      this.infPeriod_ = 4;
+      this.incPeriod_ = 3;
+      this.contactInfectionRate_ = 0.35;
+      this.infPeriod_ = 9;
       this.illImmigrationRate_ = 0.0001;
     }else if (id == 4) { //COVID-19 Masks
-      this.immigrationRate_ = 0.055;
+      this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
       this.virusMorbidity_ = 0.000043;
-      this.incPeriod_ = 2;
-      this.contactInfectionRate_ = 0.3;
-      this.infPeriod_ = 4;
+      this.incPeriod_ = 3;
+      this.contactInfectionRate_ = 0.15;
+      this.infPeriod_ = 9;
       this.illImmigrationRate_ = 0.015;
     }
   }
@@ -760,6 +729,20 @@ class Epidemic {
       this.drawInfGraph(this.day100[longestIndex], avgInf, "Avg-Infected");
       this.drawIncGraph(this.day100[longestIndex], avgInc, "Avg-Incubated");
       this.drawRecGraph(this.day100[longestIndex], avgRec, "Avg-Recovered");
+      //Send data to be stored locally
+      var avgObj = {
+        day: this.day100[longestIndex],
+        inc: avgInc,
+        inf: avgInf,
+        rec: avgRec
+      };
+      const sendJSON = JSON.stringify(avgObj);
+
+      var url = `${window.location.href}save`;
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', url, true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.send(sendJSON);
       //Reset vars
       this.repeat = false;
       this.repeatCount = 0;
