@@ -4,7 +4,7 @@ function get2D(cells) {
   var twoD = [];
   for (var i = 0; i < cells.length; i++){
     temp.push(cells[i]);
-    if (temp.length == 40){
+    if (temp.length == 36){
       twoD.push(temp);
       temp = [];
     }
@@ -161,6 +161,7 @@ class Grid {
     this.recoveredCount = 0;
     this.nearestCities = [];
     this.immigrants = [];
+    this.largeCities = [];
     // Assign population to each cell
     for(var i = 0; i < this.cellsCount; i++) {
       this.cells[i] = new Cell(cellsPopulation[i], cellsPopulation[i] * 2.5);
@@ -169,6 +170,12 @@ class Grid {
     //find nearest city over population 50000 for every cell
     for (var i = 0; i < this.cellsCount; i++){
       this.nearestCities.push(this.findClosestBigCity(i));
+    }
+    //find all large Cities
+    for (var i = 0; i < this.cellsCount; i++){
+      if (this.cells[i].populationCount >= 50000){
+        this.largeCities.push(i);
+      }
     }
   }
 
@@ -227,7 +234,14 @@ class Grid {
     if (possibleDown && possibleLeft) {
       neighbours.push(index + this.colsCount - 1);
     }
-    return neighbours;
+    //check if neighbours have population
+    var populatedNeighbours = [];
+    for (var i = 0; i < neighbours.length; i++){
+      if (this.cells[neighbours[i]].populationCount > 0){
+        populatedNeighbours.push(neighbours[i]);
+      }
+    }
+    return populatedNeighbours;
   }
 
   findClosestBigCity(index){//Find closest city of pop > 50000 to cell at index
@@ -263,7 +277,7 @@ class Grid {
       //Find closest big city
       var x;
       var y;
-      var smallest = 1000;//large num to be replaced by smaller distance
+      var smallest = 10000;//large num to be replaced by smaller distance
       var smallestIndex;
       var distance;
       for (var i = 0; i < bigCities.length; i++){
@@ -279,36 +293,47 @@ class Grid {
       if (smallestIndex == undefined){
         return 551;
       }else{
-        var closestIndex = ((smallestIndex[1]*40)-40) + smallestIndex[0];
+        var closestIndex = ((smallestIndex[1]+1)*36) + smallestIndex[0];
         return closestIndex;
       }
     }
   }
 
   simImmigrations(config){ //Sim immigrations to neighbouring cells/Large cities
+    var randomCells = [];
+    for (var i = 0; i < 25; i++){
+      var random = Math.floor(Math.random() * (1296 - 0 + 1) + 0);
+      randomCells.push(random);
+    }
     for (var i = 0; i < this.cells.length; i++){
-      var neighbours = this.getNeighbours(i);
-      neighbours.push(this.nearestCities[i])
-      //equal amount go to all neighbours and big city
-      //No need to move rec/inc as they cant infected/be infected so makes no difference if they are simulated
-      var toMoveArray = this.cells[i].getImmigrants(config.immigrationRate, config.illImmigrationRate );
-      var toMoveInf = Math.round(toMoveArray[0]);
-      var toMoveSus = Math.round(toMoveArray[1]);
-      //add devide by neighbours.length
-      for(var j = 0; j < neighbours.length; j++) {
-        if (j == (neighbours.length-1)){
-          toMoveInf *= 0.23; //big city rate
-          toMoveSus *= 0.23;
+      if (this.cells[i].populationCount > 0){
+        var neighbours = this.getNeighbours(i);
+        //nearest big city - NOT WORKING
+        neighbours.push(this.nearestCities[i]);
+
+        //random big city - Works
+        if (randomCells.includes(i)){
+          var random = Math.floor(Math.random() * ((this.largeCities.length) - 0 + 1) + 0);
+          neighbours.push(this.largeCities[random]);
+        };
+
+        //equal amount go to all neighbours and big city/random city
+        //No need to move rec/inc as they cant infected/be infected so makes no difference if they are simulated
+        var toMoveArray = this.cells[i].getImmigrants(config.immigrationRate, config.illImmigrationRate);
+        var toMoveInf = Math.round((toMoveArray[0]) / neighbours.length);
+        var toMoveSus = Math.round((toMoveArray[1]) / neighbours.length);
+        //add devide by neighbours.length
+        for(var j = 0; j < neighbours.length; j++) {
+          //store immigrants origin and current location for move back later
+          var immigrant = {
+            origin: i,
+            neigh: neighbours[j],
+            susPop: toMoveSus,
+            infPop: toMoveInf,
+            newInf: 0
+          }
+          this.immigrants.push(immigrant);
         }
-        //store immigrants origin and current location for move back later
-        var immigrant = {
-          origin: i,
-          neigh: neighbours[j],
-          susPop: toMoveSus,
-          infPop: toMoveInf,
-          newInf: 0
-        }
-        this.immigrants.push(immigrant);
       }
     }
   }
@@ -451,9 +476,9 @@ class Configuration {
       this.naturalDeathRate_ = 0.0001;
       this.virusMorbidity_ = 0.00015;
       this.incPeriod_ = 3;
-      this.contactInfectionRate_ = 0.35;
+      this.contactInfectionRate_ = 0.4;
       this.infPeriod_ = 9;
-      this.illImmigrationRate_ = 0.015;
+      this.illImmigrationRate_ = 0.15;
     }else if (id == 2) { //Influenza
       this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
@@ -462,7 +487,7 @@ class Configuration {
       this.incPeriod_ = 2;
       this.contactInfectionRate_ = 0.35;
       this.infPeriod_ = 4;
-      this.illImmigrationRate_ = 0.015;
+      this.illImmigrationRate_ = 0.15;
     }else if (id == 3) { //COVID-19 Lockdown
       this.immigrationRate_ = 0.05;
       this.birthRate_ = 0.0001;
@@ -471,7 +496,7 @@ class Configuration {
       this.incPeriod_ = 3;
       this.contactInfectionRate_ = 0.35;
       this.infPeriod_ = 9;
-      this.illImmigrationRate_ = 0.0001;
+      this.illImmigrationRate_ = 0.01;
     }else if (id == 4) { //COVID-19 Masks
       this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
@@ -480,7 +505,7 @@ class Configuration {
       this.incPeriod_ = 3;
       this.contactInfectionRate_ = 0.15;
       this.infPeriod_ = 9;
-      this.illImmigrationRate_ = 0.015;
+      this.illImmigrationRate_ = 0.15;
     }
   }
 
