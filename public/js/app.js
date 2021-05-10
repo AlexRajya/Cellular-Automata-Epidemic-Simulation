@@ -76,7 +76,9 @@ class Cell {
 
   simVirusMorbidity(prob) { //Simulate deaths caused by virus
     for (var i = 0; i < this.incubated.length; i++) {
-      this.incubated[i] -=  Math.round(this.incubated[i] * prob);
+      for (var j  = 0; i < ageMort.length; i++){
+        this.incubated[i] -= Math.round(this.incubated[i]*ageDist[j]*ageMort[j]);
+      }
     }
     for (var i = 0; i < this.infected.length; i++) {
       this.infected[i] -=  Math.round(this.infected[i] * prob);
@@ -320,8 +322,8 @@ class Grid {
         //equal amount go to all neighbours and big city/random city
         //No need to move rec/inc as they cant infected/be infected so makes no difference if they are simulated
         var toMoveArray = this.cells[i].getImmigrants(config.immigrationRate, config.illImmigrationRate);
-        var toMoveInf = Math.round((toMoveArray[0]) / neighbours.length);
-        var toMoveSus = Math.round((toMoveArray[1]) / neighbours.length);
+        var toMoveInf = Math.round(toMoveArray[0] / neighbours.length);
+        var toMoveSus = Math.round(toMoveArray[1] / neighbours.length);
         //add devide by neighbours.length
         for(var j = 0; j < neighbours.length; j++) {
           //store immigrants origin and current location for move back later
@@ -423,7 +425,7 @@ class Picture {
       if (cells[i].populationLimit > 0) {
         var totalInfected = cells[i].infectedCount + cells[i].incubatedCount;
         var percentage = totalInfected / cells[i].populationCount;
-        this.ctx.fillStyle = "rgba(255,0,0," + (percentage * 1.3) + ")";
+        this.ctx.fillStyle = "rgba(255,0,0," + percentage + ")";
         this.ctx.clearRect((i % this.rowsCount) * this.sizeX, Math.floor(i / this.rowsCount) *
                       this.sizeY, this.sizeX, this.sizeY);
         this.ctx.fillRect((i % this.rowsCount) * this.sizeX, Math.floor(i / this.rowsCount) *
@@ -609,7 +611,7 @@ class Epidemic {
   run() { //Set interval to keep incrementing simulation until stopped
     this.running = true;
     var that = this;
-    this.interval = setInterval(function() { that.nextStep()}, 75 );
+    this.interval = setInterval(function() { that.nextStep()}, 100 );
   }
 
   showStats() { //Display total counts on webpage
