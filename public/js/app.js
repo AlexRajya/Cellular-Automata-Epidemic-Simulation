@@ -15,7 +15,7 @@ function get2D(cells) {
 //Cell class
 //This class represents one cell in the grid.
 class Cell {
-  constructor(population, populationLimit) {
+  constructor(population, populationLimit, index) {
     this.populationLimit = populationLimit;
     this.susceptible = population;
     this.incubated = [];//This array represents a queue
@@ -23,6 +23,7 @@ class Cell {
     this.recovered = 0;
     this.susAway = 0;
     this.infAway = 0;
+    this.index_ = index;
   }
 
   get populationCount() { //Return overall population count
@@ -34,6 +35,7 @@ class Cell {
   get incubatedCount() {return Math.round((this.incubated).reduce((a, b) => a + b, 0));}
   get susceptibleCount() {return this.susceptible;}
   get recoveredCount() {return Math.round(this.recovered);}
+  get index() {return this.index_;}
 
   addInfected(val) {
     this.infected.push(val);//Add to infected queue
@@ -166,13 +168,14 @@ class Grid {
     this.largeCities = [];
     // Assign population to each cell
     for(var i = 0; i < this.cellsCount; i++) {
-      this.cells[i] = new Cell(cellsPopulation[i], cellsPopulation[i] * 2.5);
+      this.cells[i] = new Cell(cellsPopulation[i], cellsPopulation[i] * 2.5, i);
     }
 
     //find nearest city over population 50000 for every cell
     for (var i = 0; i < this.cellsCount; i++){
       this.nearestCities.push(this.findClosestBigCity(i));
     }
+
     //find all large Cities
     for (var i = 0; i < this.cellsCount; i++){
       if (this.cells[i].populationCount >= 50000){
@@ -264,6 +267,7 @@ class Grid {
           }
         }
       }
+
       //find XY of current cell
       var xy = [];
       for (var i = 0; i < twoD.length; i++){
@@ -292,12 +296,7 @@ class Grid {
           smallestIndex = [x,y];
         }
       }
-      if (smallestIndex == undefined){
-        return 551;
-      }else{
-        var closestIndex = ((smallestIndex[1]+1)*36) + smallestIndex[0];
-        return closestIndex;
-      }
+      return twoD[smallestIndex[1]][smallestIndex[0]].index;
     }
   }
 
@@ -310,10 +309,10 @@ class Grid {
     for (var i = 0; i < this.cells.length; i++){
       if (this.cells[i].populationCount > 0){
         var neighbours = this.getNeighbours(i);
-        //nearest big city - NOT WORKING
+        //nearest big city for cell at index I
         neighbours.push(this.nearestCities[i]);
 
-        //random big city - Works
+        //random big city
         if (randomCells.includes(i)){
           var random = Math.floor(Math.random() * ((this.largeCities.length) - 0 + 1) + 0);
           neighbours.push(this.largeCities[random]);
