@@ -83,7 +83,9 @@ class Cell {
       }
     }
     for (var i = 0; i < this.infected.length; i++) {
-      this.infected[i] -=  Math.round(this.infected[i] * prob);
+      for (var j  = 0; i < ageMort.length; i++){
+        this.infected[i] -= Math.round(this.infected[i]*ageDist[j]*ageMort[j]);
+      }
     }
   }
 
@@ -122,7 +124,7 @@ class Cell {
         this.susceptible = 0;
       }
       //check if any incubated turns into infectious based on length of queue
-      if (this.incubated.length >= incPeriod){
+      if (this.incubated.length > incPeriod){
         var newInfected = this.incubated[0];
         this.infected.push(newInfected);
         this.incubated.shift();
@@ -142,7 +144,7 @@ class Cell {
   }
 
   simRecoveries(infLength) { //Simulate recovering from virus
-    if (this.infected.length == infLength){
+    if (this.infected.length > infLength){
       var newRecovered = this.infected[0];
       this.infected.shift();
       this.recovered += newRecovered;
