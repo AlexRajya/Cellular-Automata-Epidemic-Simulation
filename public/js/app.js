@@ -458,9 +458,6 @@ class Configuration {
   constructor(){
     this.loadPredefinedSettings(1);
     this.pushSettingsToForm();
-    this.params = ["immigrationRate", "birthRate", "naturalDeathRate",
-    "virusMorbidity", "incPeriod", "contactInfectionRate",
-    "infPeriod", "illImmigrationRate"];
   }
 
   get immigrationRate(){return this.immigrationRate_;}
@@ -836,6 +833,7 @@ window.onload = () => {
   };
   function startDefPress(e){
     e.preventDefault();
+    epidemic.restart();
     epidemic.randomInfected();
     epidemic.run();
   };
