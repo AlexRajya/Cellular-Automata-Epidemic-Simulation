@@ -76,7 +76,7 @@ class Cell {
     this.recovered -= Math.round(this.recovered * prob);
   }
 
-  simVirusMorbidity(prob) { //Simulate deaths caused by virus
+  simVirusMorbidity(ageDist, ageMort) { //Simulate deaths caused by virus
     for (var i = 0; i < this.incubated.length; i++) {
       for (var j  = 0; i < ageMort.length; i++){
         this.incubated[i] -= Math.round(this.incubated[i]*ageDist[j]*ageMort[j]);
@@ -378,7 +378,7 @@ class Grid {
     // Simulates natural deaths, deaths caused by the virus and new births.
     for(var i = 0; i < this.cellsCount; i++) {
       this.cells[i].simNaturalDeaths(config.naturalDeathRate);
-      this.cells[i].simVirusMorbidity(config.virusMorbidity);
+      this.cells[i].simVirusMorbidity(config.ageDist, config.ageMort);
       this.cells[i].simBirths(config.birthRate);
       //update immigrants list with updated infectious/recovered immigrants
       this.immigrants = this.cells[i].simInfections(config.contactInfectionRate, config.incPeriod, i, this.immigrants);
@@ -474,7 +474,28 @@ class Configuration {
       this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
-      this.virusMorbidity_ = 0.00015;
+      this.ageMort = {
+        0: 0,
+        1: 0.0005,
+        2: 0.00105,
+        3: 0.001875,
+        4: 0.00295,
+        5: 0.008,
+        6: 0.027,
+        7: 0.07975,
+        8: 0.159
+      };
+      this.ageDist = {
+        0: 0.10,
+        1: 0.097,
+        2: 0.123,
+        3: 0.161,
+        4: 0.143,
+        5: 0.123,
+        6: 0.136,
+        7: 0.072,
+        8: 0.046
+      };
       this.incPeriod_ = 3;
       this.contactInfectionRate_ = 0.4;
       this.infPeriod_ = 9;
@@ -483,7 +504,28 @@ class Configuration {
       this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
-      this.virusMorbidity_ = 0.000043;
+      this.ageMort = {
+        0: 0,
+        1: 0.0005,
+        2: 0.00105,
+        3: 0.001875,
+        4: 0.00295,
+        5: 0.008,
+        6: 0.027,
+        7: 0.07975,
+        8: 0.159
+      };
+      this.ageDist = {
+        0: 0.10,
+        1: 0.097,
+        2: 0.123,
+        3: 0.161,
+        4: 0.143,
+        5: 0.123,
+        6: 0.136,
+        7: 0.072,
+        8: 0.046
+      };
       this.incPeriod_ = 2;
       this.contactInfectionRate_ = 0.35;
       this.infPeriod_ = 4;
@@ -492,7 +534,28 @@ class Configuration {
       this.immigrationRate_ = 0.05;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
-      this.virusMorbidity_ = 0.000043;
+      this.ageMort = {
+        0: 0,
+        1: 0.0005,
+        2: 0.00105,
+        3: 0.001875,
+        4: 0.00295,
+        5: 0.008,
+        6: 0.027,
+        7: 0.07975,
+        8: 0.159
+      };
+      this.ageDist = {
+        0: 0.10,
+        1: 0.097,
+        2: 0.123,
+        3: 0.161,
+        4: 0.143,
+        5: 0.123,
+        6: 0.136,
+        7: 0.072,
+        8: 0.046
+      };
       this.incPeriod_ = 3;
       this.contactInfectionRate_ = 0.35;
       this.infPeriod_ = 9;
@@ -501,7 +564,28 @@ class Configuration {
       this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
-      this.virusMorbidity_ = 0.000043;
+      this.ageMort = {
+        0: 0,
+        1: 0.0005,
+        2: 0.00105,
+        3: 0.001875,
+        4: 0.00295,
+        5: 0.008,
+        6: 0.027,
+        7: 0.07975,
+        8: 0.159
+      };
+      this.ageDist = {
+        0: 0.10,
+        1: 0.097,
+        2: 0.123,
+        3: 0.161,
+        4: 0.143,
+        5: 0.123,
+        6: 0.136,
+        7: 0.072,
+        8: 0.046
+      };
       this.incPeriod_ = 3;
       this.contactInfectionRate_ = 0.15;
       this.infPeriod_ = 9;
@@ -513,7 +597,6 @@ class Configuration {
     this.immigrationRate_ = document.getElementById('immigrationRate').value;
     this.birthRate_ = document.getElementById('birthRate').value;
     this.naturalDeathRate_ = document.getElementById('naturalDeathRate').value;
-    this.virusMorbidity_ = document.getElementById('virusMorbidity').value;
     this.incPeriod_ = document.getElementById('incPeriod').value;
     this.contactInfectionRate_ = document.getElementById('contactInfectionRate').value;
     this.infPeriod_ = document.getElementById('infPeriod').value;
@@ -524,7 +607,6 @@ class Configuration {
     document.getElementById('immigrationRate').value = this.immigrationRate_;
     document.getElementById('birthRate').value = this.birthRate_;
     document.getElementById('naturalDeathRate').value = this.naturalDeathRate_;
-    document.getElementById('virusMorbidity').value = this.virusMorbidity_;
     document.getElementById('incPeriod').value = this.incPeriod_;
     document.getElementById('contactInfectionRate').value = this.contactInfectionRate_;
     document.getElementById('infPeriod').value = this.infPeriod_;
