@@ -394,7 +394,7 @@ class Grid {
 }
 
 //Picture class
-//Shows map of Poland, gather mouse clicks.
+//Shows map of Germany, gather mouse clicks.
 class Picture {
   constructor(cols, rows) {
     this.colsCount = cols;
