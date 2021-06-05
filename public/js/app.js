@@ -43,10 +43,10 @@ class Cell {
 
   getImmigrants(immigrationRate, illImmigrationRate) {
     var toMoveInf = this.infectedCount * illImmigrationRate;
-    this.infAway = toMoveInf;
+    this.infAway = Math.round(toMoveInf);
 
     var toMoveSus = this.susceptible * immigrationRate;
-    this.susAway = toMoveSus;
+    this.susAway = Math.round(toMoveSus);
 
     return [toMoveInf, toMoveSus];
   }
@@ -485,16 +485,16 @@ class Configuration {
         7: 0.07975,
         8: 0.159
       };
-      this.ageDist = {
-        0: 0.10,
-        1: 0.097,
-        2: 0.123,
-        3: 0.161,
-        4: 0.143,
-        5: 0.123,
-        6: 0.136,
-        7: 0.072,
-        8: 0.046
+      this.ageDist = {//For Germany
+        0: 0.092,
+        1: 0.096,
+        2: 0.112,
+        3: 0.128,
+        4: 0.125,
+        5: 0.162,
+        6: 0.124,
+        7: 0.088,
+        8: 0.069
       };
       this.incPeriod_ = 3;
       this.contactInfectionRate_ = 0.4;
@@ -516,15 +516,15 @@ class Configuration {
         8: 0.159
       };
       this.ageDist = {
-        0: 0.10,
-        1: 0.097,
-        2: 0.123,
-        3: 0.161,
-        4: 0.143,
-        5: 0.123,
-        6: 0.136,
-        7: 0.072,
-        8: 0.046
+        0: 0.092,
+        1: 0.096,
+        2: 0.112,
+        3: 0.128,
+        4: 0.125,
+        5: 0.162,
+        6: 0.124,
+        7: 0.088,
+        8: 0.069
       };
       this.incPeriod_ = 2;
       this.contactInfectionRate_ = 0.35;
@@ -546,15 +546,15 @@ class Configuration {
         8: 0.159
       };
       this.ageDist = {
-        0: 0.10,
-        1: 0.097,
-        2: 0.123,
-        3: 0.161,
-        4: 0.143,
-        5: 0.123,
-        6: 0.136,
-        7: 0.072,
-        8: 0.046
+        0: 0.092,
+        1: 0.096,
+        2: 0.112,
+        3: 0.128,
+        4: 0.125,
+        5: 0.162,
+        6: 0.124,
+        7: 0.088,
+        8: 0.069
       };
       this.incPeriod_ = 3;
       this.contactInfectionRate_ = 0.35;
@@ -576,15 +576,15 @@ class Configuration {
         8: 0.159
       };
       this.ageDist = {
-        0: 0.10,
-        1: 0.097,
-        2: 0.123,
-        3: 0.161,
-        4: 0.143,
-        5: 0.123,
-        6: 0.136,
-        7: 0.072,
-        8: 0.046
+        0: 0.092,
+        1: 0.096,
+        2: 0.112,
+        3: 0.128,
+        4: 0.125,
+        5: 0.162,
+        6: 0.124,
+        7: 0.088,
+        8: 0.069
       };
       this.incPeriod_ = 3;
       this.contactInfectionRate_ = 0.15;
@@ -691,7 +691,35 @@ class Epidemic {
   run() { //Set interval to keep incrementing simulation until stopped
     this.running = true;
     var that = this;
+    this.startTime = Date.now();
     this.interval = setInterval(function() { that.nextStep()}, 100 );
+    this.disableButtons();
+  }
+
+  disableButtons() {
+    var buttons = [];
+    buttons.push(document.getElementById("start"));
+    buttons.push(document.getElementById("startDef"));
+    buttons.push(document.getElementById("oneStep"));
+    buttons.push(document.getElementById("run100"));
+    buttons.push(document.getElementById("run10"));
+
+    for (var i = 0; i < buttons.length; i++){
+      buttons[i].disabled = true;
+    }
+  }
+
+  enableButtons() {
+    var buttons = [];
+    buttons.push(document.getElementById("start"));
+    buttons.push(document.getElementById("startDef"));
+    buttons.push(document.getElementById("oneStep"));
+    buttons.push(document.getElementById("run100"));
+    buttons.push(document.getElementById("run10"));
+
+    for (var i = 0; i < buttons.length; i++){
+      buttons[i].disabled = false;
+    }
   }
 
   showStats() { //Display total counts on webpage
@@ -720,6 +748,9 @@ class Epidemic {
     this.drawRecGraph(this.dayData, this.recData, "Recovered");
     //check if simulation is finished
     if ((this.iterationNumber > 1) && ((inf+inc) == 0)){
+      let timeTaken = (Date.now() - this.startTime)/1000;//Convert to seconds
+      console.log("Simulation Completed in: "+timeTaken+"s");
+      console.log("Total time steps: "+this.iterationNumber);
       this.finished();
     }
   }
@@ -764,11 +795,13 @@ class Epidemic {
       this.day100.push(this.dayData);
       this.run100(this.runAmount);
     }
+    this.enableButtons();
   }
 
   pause() { //Pause simulation
     this.running = false;
     clearInterval(this.interval);
+    this.enableButtons();
   }
 
   infectedUpdated(event) {
@@ -866,6 +899,7 @@ class Epidemic {
   }
 
   restart() { //Restart simulation
+    this.enableButtons();
     this.grid.resetCells();
     this.iterationNumber = 0;
     this.picture.updateWithNewData(this.grid.cells);
@@ -929,9 +963,6 @@ window.onload = () => {
   };
   function restartPress(e) {
     e.preventDefault();
-    var val = document.querySelector('input[name="providedEpidemics"]:checked').value;
-    config.loadPredefinedSettings(val);
-    config.pushSettingsToForm();
     epidemic.restart();
     epidemic.pause();
   };
@@ -944,6 +975,8 @@ window.onload = () => {
     config.pushSettingsToForm();
   }
   function settingPress(e){
+    var sel = document.querySelector('input[name="providedEpidemics"]:checked');
+    sel.checked = false;
     config.loadSettingsFromForm();
     console.log("Custom settings loaded");
   }
