@@ -479,7 +479,7 @@ class Configuration {
 
   loadPredefinedSettings(id){ //Load preset
     if (id == 1) { //COVID-19
-      this.immigrationRate_ = 0.7;
+      this.immigrationRate_ = 0.5;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
       this.ageMort = {
