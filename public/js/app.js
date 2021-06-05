@@ -43,10 +43,10 @@ class Cell {
 
   getImmigrants(immigrationRate, illImmigrationRate) {
     var toMoveInf = this.infectedCount * illImmigrationRate;
-    this.infAway = Math.round(toMoveInf);
-
+    this.infAway = Math.floor(toMoveInf);
+    //no need to remove from counts as taken away from equations
     var toMoveSus = this.susceptible * immigrationRate;
-    this.susAway = Math.round(toMoveSus);
+    this.susAway = Math.floor(toMoveSus);
 
     return [toMoveInf, toMoveSus];
   }
@@ -59,6 +59,9 @@ class Cell {
       this.incubated[0] = newInf;
     }
     this.susceptible -= newInf;
+    if (this.susceptible < 0){
+      this.susceptible = 0;//Rounding may cause negative in rare cases
+    }
     this.susAway = 0;
     this.infAway = 0;
   }
@@ -115,6 +118,11 @@ class Cell {
                               / ((this.populationCount + immigrantsPop) - this.susAway - this.infAway);
 
       var infectionProb = prob * percentageInfected;
+      if (infectionProb < 0){
+        infectionProb = 0;
+      }else if (infectionProb > 1){
+        infectionProb = 1;
+      }
 
       //Add newly infected
       var newIncubated = Math.round(this.susceptible * infectionProb);
@@ -323,8 +331,8 @@ class Grid {
         //equal amount go to all neighbours and big city/random city
         //No need to move rec/inc as they cant infected/be infected so makes no difference if they are simulated
         var toMoveArray = this.cells[i].getImmigrants(config.immigrationRate, config.illImmigrationRate);
-        var toMoveInf = Math.round(toMoveArray[0] / neighbours.length);
-        var toMoveSus = Math.round(toMoveArray[1] / neighbours.length);
+        var toMoveInf = Math.floor(toMoveArray[0] / neighbours.length);
+        var toMoveSus = Math.floor(toMoveArray[1] / neighbours.length);
         //add devide by neighbours.length
         for(var j = 0; j < neighbours.length; j++) {
           //store immigrants origin and current location for move back later
@@ -471,7 +479,7 @@ class Configuration {
 
   loadPredefinedSettings(id){ //Load preset
     if (id == 1) { //COVID-19
-      this.immigrationRate_ = 0.5;
+      this.immigrationRate_ = 0.7;
       this.birthRate_ = 0.0001;
       this.naturalDeathRate_ = 0.0001;
       this.ageMort = {
@@ -976,7 +984,9 @@ window.onload = () => {
   }
   function settingPress(e){
     var sel = document.querySelector('input[name="providedEpidemics"]:checked');
-    sel.checked = false;
+    if (sel){
+      sel.checked = false;
+    }
     config.loadSettingsFromForm();
     console.log("Custom settings loaded");
   }
