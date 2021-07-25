@@ -1,5 +1,5 @@
 # Cellular-Automata-Coronavirus-Simulation
-This project is for my final year project. This project works on improving existing simulation models using 2D cellular automata and applying them to COVID-19.
+This app was made for my final year project at university. This app implements a novel simulation model incorporating 2D cellular automata to simulate COVID-19 in Germany.
 
 # Install
 1. Clone repo / Download folder 
